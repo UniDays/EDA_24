@@ -1,4 +1,4 @@
-# EDCHost22
+# EDCHost24
 ## 注意：先将icon和labyrinth文件夹添加到运行程序的文件夹中！！！
 
 ## 软件使用方法
