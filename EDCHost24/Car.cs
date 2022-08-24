@@ -13,13 +13,14 @@ namespace EDCHOST22
     };
     public class Car //选手的车
     {
-        public const int PKG_CREDIT = 10;        //获取物资可以得到10分;
-        public const int RESCUE_CREDIT = 30;     //营救人员可以得到30分;
-        public const int FLOOD_PENALTY = 5;     //经过泄洪口惩罚15分;
-        public const int OBST_PENALTY = 50;      //经过虚拟障碍物惩罚50分;
-        public const int WRONG_DIR_PENALTY = 10; //逆行惩罚10分;
-        public const int FOUL_PENALTY = 50;      //犯规扣分50分;
-
+        public const int RUN_CREDIT = 10;        //小车启动可以得到10分;
+        public const int ARRIVE_CREDIT = 20;     //规定时间内送达外卖可以得到20分;
+        public const int CHARGE_CREDIT = 5;      //放置一个充电站可以得到5分;
+        public const int LATE_PENALTY = 5;       //外卖超时1秒惩罚5分;
+        public const int NON_GATE_PENALTY = 10;  //未经过规定出入口出入惩罚10分;
+        public const int FOUL_PENALTY = 50;      //一个惩罚标记扣分50分;
+        public const int MAX_PKG_COUNT = 5;      //车上最多携带的包裹数量
+        public const int MAX_CHARGER_COUNT = 3;  //小车最多放置的充电桩数量
 
         public Dot mPos;
         public Dot mLastPos;
@@ -27,20 +28,21 @@ namespace EDCHOST22
         public Dot mTransPos;
         public Camp MyCamp;               //A or B get、set直接两个封装好的函数
         public int MyScore;               //得分
-        public int mPkgCount;             //小车成功收集物资个数
+        public int mIsAbleToRun;          //小车是否能成功启动 0不能启动，1能启动
+        public int mArrivalCount;         //小车成功在规定时间内送达外卖个数
         public int mTaskState;            //小车任务 0为上半场任务，1为下半场任务
-        public int mIsWithPassenger;      //小车上是否载人 0未载人 1载人
-        public int mRescueCount;          //小车成功运送人个数
-        public int mIsInMaze;             //小车所在的区域 0在迷宫外 1在迷宫内
-        public int mIsInField;            //小车目前在不在场地内 0不在场地内 1在场地内
-        public int mCrossFloodCount;      //小车经过泄洪口的次数
-        public int mCrossWallCount;       //小车经过虚拟障碍的次数
-        public int mWrongDirCount;        //小车逆行次数
-        public int mFoulCount;            //犯规摁键次数
+        public int mPkgCount;             //小车上放有外卖个数
+        public int mChargeCount;          //小车放置的充电站个数
+        public int mLateSeconds;          //小车送达外卖超时总秒数
+        public int mNonGateCount;         //小车未经过规定出入口出入核心区的次数
+        public int mIsInField;            //小车目前在不在核心区内 0不在核心区内 1在核心区内
+        public int mIsInCharge;           //小车目前是否在充电区域内 0不在充电区内 1在充电区内
+        public int mFoulCount;            //小车获得惩罚的个数
+        
+        /*Game里如果用不到就删
         public int mRightPos;             //小车现在的位置信息是否是正确的，0为不正确的，1为正确的
         public int mRightPosCount;        //用于记录小车位置是否该正确了
-        public int WhetherCarIn;          //记录小车是否进入了迷宫
-        public int WhetherCarOut;          //记录小车是否会到入口
+        */
 
 
         public Car(Camp c, int task)
@@ -51,19 +53,18 @@ namespace EDCHOST22
             mLastOneSecondPos = new Dot(0, 0);
             mTransPos = new Dot(0, 0);
             MyScore = 0;
-            mPkgCount = 0;
+            mIsAbleToRun = 0;
+            mArrivalCount = 0;
             mTaskState = task;
-            mIsWithPassenger = 0;
-            mRescueCount = 0;
-            mIsInMaze = 0;
-            mCrossFloodCount = 0;
-            mCrossWallCount = 0;
-            mWrongDirCount = 0;
-            mFoulCount = 0; //xhl 0824 添加
-            mRightPos = 1;
-            mRightPosCount = 0;
-            WhetherCarIn = 0;
-            WhetherCarOut = 0;
+            mPkgCount = 0;
+            mChargeCount = 0;
+            mLateSeconds = 0;
+            mNonGateCount = 0;
+            mIsInField = 0;
+            mIsInCharge = 0;
+            mFoulCount = 0;
+            //mRightPos = 1;
+            //mRightPosCount = 0;
         }
         public void UpdateLastPos()
         {
@@ -75,68 +76,62 @@ namespace EDCHOST22
             mPos = pos;
         }
 
-        public void AddFloodPunish() //犯规
+        public void AddLatePunish()   //扣分
         {
-            mCrossFloodCount++;
+            mLateSeconds++;
             UpdateScore();
         }
-        public void AddWallPunish()
+        public void AddNonGatePunish()
         {
-            mCrossWallCount++; //前一个版本疑似typo（xhl）
+            mNonGateCount++; 
             UpdateScore();
         }
-        public void AddWrongDirection()
-        {
-            mWrongDirCount++;
-            UpdateScore();
-        }
-        public void AddRescueCount()
-        {
-            mRescueCount++;
-            UpdateScore();
-        }
-
-        public void AddPickPkgCount()
-        {
-            mPkgCount++;
-            UpdateScore();
-        }
-        public void AddFoulCount()
+          public void AddFoulCount()
         {
             mFoulCount++;
             UpdateScore();
         }
-        public void SwitchPassengerState()
+        public void AddArrivalCount()  //得分
         {
-            if (mIsWithPassenger == 0)
-            {
-                mIsWithPassenger = 1;
-            }
-            else
-            {
-                mIsWithPassenger = 0;
-            }
-        }
-        public void CarGetIn()
-        {
-            WhetherCarIn = 1;
+            mArrivalCount++;
             UpdateScore();
         }
-        public void CarGetOut()
+
+        public void AddChargeCount()
         {
-            WhetherCarOut = 1;
+            if (mChargeCount < MAX_CHARGER_COUNT)
+            {
+            mChargeCount++;
+            UpdateScore();
+            }
+        }
+        public void CarRun()           //小车启动
+        {
+            mIsAbleToRun = 1;
             UpdateScore();
         }
-        //8-14 yd将Score后的代码折成多行，便于阅读
+        public void PickPackage()      //拾取外卖
+        {
+            if (mPkgCount < MAX_PKG_COUNT)
+            {
+                mPkgCount++;
+            }
+        }
+        public void DropPackage()      //送达外卖
+        {
+            if (mPkgCount > 0)
+            {
+                mPkgCount--;
+            }
+        }
         public void UpdateScore()
         {
-            MyScore = mPkgCount * PKG_CREDIT
-                + mRescueCount * RESCUE_CREDIT
-                - mCrossFloodCount * FLOOD_PENALTY
-                - OBST_PENALTY * mCrossWallCount
-                - mWrongDirCount * WRONG_DIR_PENALTY
-                - mFoulCount * FOUL_PENALTY
-                + WhetherCarIn * 25 + WhetherCarOut * 25;
+            MyScore = mIsAbleToRun * RUN_CREDIT
+                + mArrivalCount * ARRIVE_CREDIT
+                + mChargeCount * CHARGE_CREDIT
+                - mLateSeconds * LATE_PENALTY
+                - mNonGateCOunt * NON_GATE_PENALTY
+                - mFoulCount * FOUL_PENALTY;
         }
     }
 }
