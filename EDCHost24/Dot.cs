@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EDCHOST22
+namespace EDCHOST24
 {
     //0813xhl把struct改成了class
     public class Dot //点
@@ -16,7 +16,8 @@ namespace EDCHOST22
         public Dot(int _x = 0, int _y = 0) { x = _x; y = _y; }
 
         //运算符重载
-        public static bool operator ==(Dot a, Dot b)
+
+        public static bool operator == (Dot a, Dot b)
         {
             return (a.x == b.x) && (a.y == b.y);
         }
