@@ -5,28 +5,41 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EDCHOST22
+namespace EDCHOST24
 {
-    //说明（xhl）：1，目前的规则下，生成package应该是读取地图即可生成。同时还要保证上下半场是不变的。
-    //2，最终Game需要读取的是PkgList（其中应该包含24个Package），所以Game啥的可以先写起来。（外界要用的是GetPkgDot）
-    //3，具体如何生成，可以等地图写出来再说。
-    public class PackageGenerator //存储预备要用的物资信息
+    //说明（ybj 8/27)
+    //1、目前尚未知场上允许有多少个外卖
+    //2、可能需要设置 不能在对方充电站等地方 设定外卖起始/终点，在checkcoincide里再添加操作
+    public class PackageGenerator 
     {
         private Package[] mpPackageList;
         private int PKG_NUM;
-        public PackageGenerator(int AMOUNT) //生成指定数量的物资
+        public PackageGenerator(int AMOUNT) //生成指定数量的外卖
         {
             PKG_NUM = AMOUNT;
             mpPackageList = new Package[PKG_NUM];
-            int nextX, nextY;
-            Dot dots;
+            int StartX, StartY;
+            int EndX, EndY;
+            Dot startdots,enddots;
             Random NRand = new Random();
             for (int i = 0; i < PKG_NUM; ++i)
             {
-                nextX = NRand.Next(Game.MAZE_CROSS_NUM);
-                nextY = NRand.Next(Game.MAZE_CROSS_NUM);
-                dots = CrossNo2Dot(nextX, nextY);
-                mpPackageList[i] = new Package(dots);
+                //需要坐标格式
+                StartX = NRand.Next(Game.MAZE_CROSS_NUM);
+                StartY = NRand.Next(Game.MAZE_CROSS_NUM);
+                EndX = NRand.Next(Game.MAZE_CROSS_NUM);
+                EndY = NRand.Next(Game.MAZE_CROSS_NUM);
+
+                startdots = CrossNo2Dot(StartX, StartY);
+                enddots = CrossNo2Dot(EndX, EndY);
+
+                if (checkcoincide(startdots) || checkcoincide(enddots))
+                {
+                    i--;
+                    continue;
+                }
+
+                mpPackageList[i] = new Package(startdots,enddots);
             }
         }
 
@@ -38,10 +51,26 @@ namespace EDCHOST22
             Dot temp = new Dot(x, y);
             return temp;
         }
+
         //返回下标为i的PackageDotArray中的点。开发者：xhl
         public Package GetPackage(int i)
         {
             return mpPackageList[i];
         }
+
+        //检验坐标是否与各种其他坐标重复
+        public bool checkcoincide(Dot adot)
+        {
+            bool same = false;
+            for(int i=0;i<PKG_NUM;++i)
+            {
+                if(mpPackageList[i].m_StartPos==adot|| mpPackageList[i].m_EndPos==adot)
+                {
+                    same = true;
+                }
+            }
+            return same;
+        }
+
     }
 }
