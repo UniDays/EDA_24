@@ -13,10 +13,8 @@ namespace EDCHOST22
     // 比赛状况：未开始、正常进行中、暂停、结束
     public enum GameState { UNSTART = 0, NORMAL = 1, PAUSE = 2, END = 3 };
 
-    // 人员状况：被困、在小车上且还未到指定点、到达目标点
-    public enum PassengerState { TRAPPED, INCAR, RESCUED };
-
     public enum GameStage { FIRST_1 = 0, FIRST_2, LATTER_1, LATTER_2 ,END};
+
     public class Game
     {
         public bool DebugMode;                       //调试模式，最大回合数 = 1,000,000
@@ -27,28 +25,39 @@ namespace EDCHOST22
         public const int MAZE_LONG_BORDER_CM = MAZE_SHORT_BORDER_CM
                                              + MAZE_CROSS_DIST_CM * (MAZE_CROSS_NUM - 1)
                                              + MAZE_SIDE_BORDER_CM * 2;//迷宫最长的靠边距离
-        public const int MAZE_SIDE_BORDER_CM = 20;         
+        public const int MAZE_SIDE_BORDER_CM = 20;   
+        
+
         public const double COINCIDE_ERR_DIST_CM = 10;  //判定小车到达某点允许的最大误差距离
-        public const int PKG_NUM_perGROUP = 6;       //场上每次刷新package物资的个数
+        public const int INITIAL_PKG_NUM = 5;
+        public const int PKG_NUM_perGROUP = 1;       //场上每次刷新package物资的个数
+
+
         public GameStage gameStage;//比赛阶段
-        public Camp UpperCamp; //当前半场需完成“上半场”任务的一方
         public GameState gameState;//比赛状态        
-        public PassengerState psgState; // 目前场上被困人员的状况（同一时间场上最多1个被困人员）
+        public Camp UpperCamp; //当前半场需完成“上半场”任务的一方
+
+
         public Car CarA, CarB;//定义小车
-        public Passenger curPsg;//当前被运载的乘客
+
+
         public Package[] currentPkgList;//当前场上的物资列表
-        public PassengerGenerator psgGenerator;//仅用来生成乘客序列
         public PackageGenerator pkgGenerator; //仅用来生成物资序列
-        public int mPackageGroupCount;//用于记录现在的Package是第几波
-        public Flood mFlood;
+
+
+        public int mPackageGroupCount;//用于记录现在的Package是第几个, index starts from 1
+
+
         public Labyrinth mLabyrinth;
+
+
         public int mPrevTime;//时间均改为以毫秒为单位,记录上一次的时间，精确到秒，实时更新
         public int mGameTime;//时间均改为以毫秒为单位
+
         public int mLastWrongDirTime;
         public int mLastOnObstacleTime;
         public FileStream FoulTimeFS;
         public int mLastOnFloodTime;
-        public Flood mLastFlood;
 
         public Game()//构造一个新的Game类 默认为CampA是先上半场上一阶段进行
         {
@@ -58,39 +67,36 @@ namespace EDCHOST22
             CarA = new Car(Camp.A, 0);
             CarB = new Car(Camp.B, 1);
             gameState = GameState.UNSTART;
-            psgState = PassengerState.TRAPPED;
-            psgGenerator = new PassengerGenerator(100);//上下半场将都用这一个索引
-            pkgGenerator = new PackageGenerator(PKG_NUM_perGROUP * 5);
+            
+            pkgGenerator = new PackageGenerator(INITIAL_PKG_NUM);
+
             currentPkgList = new Package[PKG_NUM_perGROUP];
+
             for (int i = 0;i<PKG_NUM_perGROUP;i++)
             {
                 currentPkgList[i] = new Package();
             }
-            curPsg = new Passenger(new Dot(-1, -1), new Dot(-1, -1)); //?
-            mFlood = new Flood(0);
-            mLastFlood = new Flood(0);
-            mPackageGroupCount = 0;
+            mPackageGroupCount = INITIAL_PKG_NUM;
             mLastWrongDirTime = -10;
             mLastOnObstacleTime = -10;
-            mLastOnFloodTime = -10;
 
             mLabyrinth = new Labyrinth();
             Debug.WriteLine("Game构造函数FIRST_1执行完毕");
         }
         #region
+
         //每到半点自动更新Package信息函数,8.29已更新
         public void UpdatePackage()//更换Package函数,每次都更新，而只在半分钟的时候起作用
         {
-            if (gameStage == GameStage.FIRST_1
-                || gameStage == GameStage.LATTER_1)
+            if (gameStage == GameStage.FIRST_1 || gameStage == GameStage.LATTER_1)
             {
                 return;
             }
-            int changenum = mGameTime / 30000 + 1;
-            if ((gameStage == GameStage.FIRST_2
-                || gameStage == GameStage.LATTER_2)
-                && mPackageGroupCount < changenum)
+
+            if (gameStage == GameStage.FIRST_2|| gameStage == GameStage.LATTER_2)
             {
+
+
                 for (int i = 0; i < PKG_NUM_perGROUP; i++)
                 {
 
@@ -120,11 +126,6 @@ namespace EDCHOST22
             return time;
         }
 
-        public static double GetDistance(Dot A, Dot B)//得到两个点之间的距离
-        {
-            return Math.Sqrt((A.x - B.x) * (A.x - B.x)
-                + (A.y - B.y) * (A.y - B.y));
-        }
         public void SetFloodArea()
         {
             int i, j;
