@@ -27,7 +27,9 @@ namespace EDCHOST22
         public Dot mLastOneSecondPos;
         public Dot mTransPos;
         public Camp MyCamp;               //A or B get、set直接两个封装好的函数
+
         public int MyScore;               //得分
+        
         public int mIsAbleToRun;          //小车是否能成功启动 0不能启动，1能启动
         public int mArrivalCount;         //小车成功在规定时间内送达外卖个数
         public int mTaskState;            //小车任务 0为上半场任务，1为下半场任务

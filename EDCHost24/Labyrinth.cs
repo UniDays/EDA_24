@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EDCHOST22
+namespace EDCHOST24
 {
     public class Labyrinth
     {

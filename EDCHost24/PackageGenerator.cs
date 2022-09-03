@@ -5,32 +5,74 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EDCHOST22
+namespace EDCHOST24
 {
-    //说明（xhl）：1，目前的规则下，生成package应该是读取地图即可生成。同时还要保证上下半场是不变的。
-    //2，最终Game需要读取的是PkgList（其中应该包含24个Package），所以Game啥的可以先写起来。（外界要用的是GetPkgDot）
-    //3，具体如何生成，可以等地图写出来再说。
-    public class PackageGenerator //存储预备要用的物资信息
+    // STL : Storage the Package
+    public class PackageList //存储预备要用的物资信息
     {
-        private Package[] mpPackageList;
-        private int PKG_NUM;
-        public PackageGenerator(int AMOUNT) //生成指定数量的物资
+        private List<Package> mPackageList;
+
+        private int X_MAX;
+        private int X_MIN;
+        private int Y_MAX;
+        private int Y_MIN;
+        private int LIMITED_TIME;
+        private int TIME_INTERVAL;
+
+        // point to package has been generated
+        public int mPointer;
+
+        public PackageList(int _X_MAX, int _X_MIN, int _Y_MAX, int _Y_MIN, int _INITIAL_AMOUNT, int _LIMITED_TIME, int _TIME_INTERVAL) //生成指定数量的物资
         {
-            PKG_NUM = AMOUNT;
-            mpPackageList = new Package[PKG_NUM];
-            int nextX, nextY;
-            Dot dots;
+            mPointer = _INITIAL_AMOUNT - 1;
+
+            X_MAX = _X_MAX;
+            X_MIN = _X_MIN;
+            Y_MAX = _Y_MAX;
+            Y_MIN = _Y_MIN;
+            LIMITED_TIME = _LIMITED_TIME;
+            TIME_INTERVAL = _TIME_INTERVAL;
+
+            mPackageList = new List<Package> ();
             Random NRand = new Random();
-            for (int i = 0; i < PKG_NUM; ++i)
+
+            // initialize package at the beginning of game
+            for (int i = 0; i < _INITIAL_AMOUNT; i++)
             {
-                nextX = NRand.Next(Game.MAZE_CROSS_NUM);
-                nextY = NRand.Next(Game.MAZE_CROSS_NUM);
-                dots = CrossNo2Dot(nextX, nextY);
-                mpPackageList[i] = new Package(dots);
+                Dot Departure = Dot(NRand.Next(X_MIN, X_MAX), NRand.Next(Y_MIN, Y_MAX));
+                Dot Destination = Dot(NRand.Next(X_MIN, X_MAX), NRand.Next(Y_MIN, Y_MAX));
+
+                if (!(IsPosLegal(Departure) && IsPosLegal(Destination)))
+                {
+                    i--;
+                    continue;
+                }
+
+                mPackageList.Add(Departure, Destination, 0);
+            }
+
+
+            // generate the time series for packages
+            int LastGenerationTime = 0;
+            for (int i = _INITIAL_AMOUNT; LastGenerationTime + TIME_INTERVAL <= LIMITED_TIME; i++)
+            {
+                Dot Departure = Dot(NRand.Next(X_MIN, X_MAX), NRand.Next(Y_MIN, Y_MAX));
+                Dot Destination = Dot(NRand.Next(X_MIN, X_MAX), NRand.Next(Y_MIN, Y_MAX));
+
+                if (!(IsPosLegal(Departure) && IsPosLegal(Destination)))
+                {
+                    i--;
+                    continue;
+                }
+
+                int GenerationTime = NRand.Next(LastGenerationTime, LastGenerationTime + TIME_INTERVAL);
+
+                LastGenerationTime += TIME_INTERVAL;
+                mPackageList.Add(Departure, Destination, GenerationTime);
             }
         }
 
-        //从格点转化为int，传入坐标，返回Dot
+        /*
         public static Dot CrossNo2Dot(int CrossNoX, int CrossNoY)
         {
             int x = Game.MAZE_SHORT_BORDER_CM + Game.MAZE_SIDE_BORDER_CM + Game.MAZE_CROSS_DIST_CM * CrossNoX;
@@ -38,10 +80,29 @@ namespace EDCHOST22
             Dot temp = new Dot(x, y);
             return temp;
         }
-        //返回下标为i的PackageDotArray中的点。开发者：xhl
-        public Package GetPackage(int i)
+        */
+
+        
+
+        public Package Index (int i)
         {
-            return mpPackageList[i];
+            return mPackageList[i];
+        }
+
+        public void PickPackage(int i)
+        {
+            mPackageList[i].PickPackage();
+        }
+
+        public void ResetPointer()
+        {
+            mPointer = 0;
+        }
+
+        // judge whether the generation point of package is legal
+        private bool IsPosLegal(Dot PackagePos)
+        {
+            
         }
     }
 }
