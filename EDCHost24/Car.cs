@@ -87,8 +87,10 @@ namespace EDCHOST24
         public void AddNonGatePunish() //扣分
         {
             mNonGateCount++; 
+            mIsInField = !mIsInField;
             UpdateScore();
         }
+        
           public void AddFoulCount()
         {
             mFoulCount++;
@@ -129,7 +131,20 @@ namespace EDCHOST24
                 mPkgCount--;
             }
         }
-        public void UpdateScore()
+
+        // ChargeTime is in millisecond
+        public void Charge (int _ChargeTime)
+        {
+
+        }
+
+        // ExtraDistance is in cm
+        public void RunOutOfPower (int _ExtraDistance)
+        {
+
+        }
+
+        private void UpdateScore()
         {
             MyScore = mIsAbleToRun * RUN_CREDIT
                 + mPickCount * PICK_CREDIT

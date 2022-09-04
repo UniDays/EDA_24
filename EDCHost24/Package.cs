@@ -120,5 +120,15 @@ namespace EDCHOST24
         {
             mActualDeliveryTime = ArrivalTime;
         }
+
+        public int GenerationTime ()
+        {
+            return mGenerationTime;
+        }
+
+        public int ScheduledDeliveryTime ()
+        {
+            return mScheduledDeliveryTime;
+        }
     }
 }

@@ -19,12 +19,12 @@ namespace EDCHOST24
         private int LIMITED_TIME;
         private int TIME_INTERVAL;
 
-        // point to package has been generated
+        // point to the next generated package 
         public int mPointer;
 
         public PackageList(int _X_MAX, int _X_MIN, int _Y_MAX, int _Y_MIN, int _INITIAL_AMOUNT, int _LIMITED_TIME, int _TIME_INTERVAL) //生成指定数量的物资
         {
-            mPointer = _INITIAL_AMOUNT - 1;
+            mPointer = _INITIAL_AMOUNT;
 
             X_MAX = _X_MAX;
             X_MIN = _X_MIN;
@@ -78,6 +78,11 @@ namespace EDCHOST24
             return mPackageList[i];
         }
 
+        public int Amount ()
+        {
+            return mPackageList.Count;
+        }
+
 
         public void PickPackage(int i)
         {
@@ -88,7 +93,12 @@ namespace EDCHOST24
         public Package GeneratePackage ()
         {
             mPointer++;
-            return PackageList[mPointer];
+            return mPackageList[mPointer - 1];
+        }
+
+        public int NextGenerationTime ()
+        {
+            return mPackageList[mPointer].GenerationTime();
         }
 
 

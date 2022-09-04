@@ -8,7 +8,7 @@ using System.IO;
 using System.Drawing;
 using System.Security.Cryptography;
 using System.Diagnostics;
-namespace EDCHOST22
+namespace EDCHOST24
 {
     /***********************************************
     Obstacle类
