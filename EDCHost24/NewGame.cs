@@ -240,8 +240,17 @@ namespace EDCHOST24
                 if ((IsInObstacle(mCar_1) && mCar_1.mIsInObstacle) ||
                     (!IsInObstacle(mCar_1) && !mCar_1.mIsInObstacle))
                 {
-                    mCar_1.
+                    mCar_1.InObstacle();
                 }
+
+                if (mGameStage == GameStage.SENCOND_HALF && 
+                ((IsInOpponentStation(mCar_1) && mCar_1.mIsInOpponentChargeStation) ||
+                    (!IsInObstacle(mCar_1) && !mCar_1.mIsInOpponentChargeStation)))
+                {
+                    mCar_1.InOpponentStation();
+                }
+
+                
             }
             else if (mCamp = Camp.B)
             {
@@ -249,6 +258,19 @@ namespace EDCHOST24
                     (!IsOutOfCompetitionArea(mCar_2) && !mCar_2.mIsInField) )
                 {
                     mCar_2.AddNonGatePunish();
+                }
+
+                if ((IsInObstacle(mCar_2) && mCar_2.mIsInObstacle) ||
+                    (!IsInObstacle(mCar_2) && !mCar_2.mIsInObstacle))
+                {
+                    mCar_2.InObstacle();
+                }
+
+                if (mGameStage == GameStage.SENCOND_HALF && 
+                ((IsInOpponentStation(mCar_2) && mCar_2.mIsInOpponentChargeStation) ||
+                    (!IsInObstacle(mCar_2) && !mCar_2.mIsInOpponentChargeStation)))
+                {
+                    mCar_2.InOpponentStation();
                 }
             }
         }
@@ -264,7 +286,7 @@ namespace EDCHOST24
 
         private bool IsInObstacle (Car _car)
         {
-            return mObstacle.isCollidedWall(_car.mPos, COLLISION_RADIUS);
+            
         }
 
         private bool IsInOpponentStation (Car _car)
