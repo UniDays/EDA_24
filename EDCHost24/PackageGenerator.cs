@@ -67,32 +67,30 @@ namespace EDCHOST24
 
                 int GenerationTime = NRand.Next(LastGenerationTime, LastGenerationTime + TIME_INTERVAL);
 
-                LastGenerationTime += TIME_INTERVAL;
+                LastGenerationTime = GenerationTime;
                 mPackageList.Add(Departure, Destination, GenerationTime);
             }
         }
 
-        /*
-        public static Dot CrossNo2Dot(int CrossNoX, int CrossNoY)
-        {
-            int x = Game.MAZE_SHORT_BORDER_CM + Game.MAZE_SIDE_BORDER_CM + Game.MAZE_CROSS_DIST_CM * CrossNoX;
-            int y = Game.MAZE_SHORT_BORDER_CM + Game.MAZE_SIDE_BORDER_CM + Game.MAZE_CROSS_DIST_CM * CrossNoY;
-            Dot temp = new Dot(x, y);
-            return temp;
-        }
-        */
-
         
-
         public Package Index (int i)
         {
             return mPackageList[i];
         }
 
+
         public void PickPackage(int i)
         {
             mPackageList[i].PickPackage();
         }
+
+
+        public Package GeneratePackage ()
+        {
+            mPointer++;
+            return PackageList[mPointer];
+        }
+
 
         public void ResetPointer()
         {

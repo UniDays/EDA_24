@@ -116,7 +116,7 @@ namespace EDCHOST22
 
         }
 
-        //该方法用于返回系统现在的时间。开发者：xhl
+        //该方法用于返回系统现在的时间
         public int GetCurrentTime()
         {
             System.DateTime currentTime = System.DateTime.Now;
@@ -296,17 +296,6 @@ namespace EDCHOST22
                 Debug.WriteLine("B 不在 Maze 中");
                 CarB.mIsInMaze = 0;
             }
-        }
-
-
-        //下面为更新乘客信息函数
-        public void UpdatePassenger()//更新乘客信息
-        {
-            Debug.WriteLine("开始执行 Update Passenger");
-            curPsg = psgGenerator.Next();
-            Debug.WriteLine("乘客位置x{0},y{1}",curPsg.Start_Dot.x, curPsg.Start_Dot.y);
-            Debug.WriteLine("乘客位置x{0},y{1}", curPsg.End_Dot.x, curPsg.End_Dot.y);
-            Debug.WriteLine("Next Passenger 成功更新");
         }
 
         public void CheckNextStage()//从上半场更换到下半场函数
