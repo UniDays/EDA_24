@@ -237,7 +237,10 @@ namespace EDCHOST24
                     mCar_1.AddNonGatePunish();
                 }
 
-                if ()
+                if ((IsInObstacle(mCar_1) && mCar_1.m))
+                {
+
+                }
             }
             else if (mCamp = Camp.B)
             {

@@ -43,6 +43,7 @@ namespace EDCHOST24
         public int mNonGateCount;         //小车未经过规定出入口出入核心区的次数
         public int mIsInField;            //小车目前在不在核心区内 0不在核心区内 1在核心区内
         public int mIsInCharge;           //小车目前是否在充电区域内 0不在充电区内 1在充电区内
+        public int mIsInObstacle;          
         public int mFoulCount;            //小车获得惩罚的个数
         
         /*Game里如果用不到就删
@@ -90,7 +91,7 @@ namespace EDCHOST24
             mIsInField = !mIsInField;
             UpdateScore();
         }
-        
+
           public void AddFoulCount()
         {
             mFoulCount++;
