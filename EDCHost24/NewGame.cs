@@ -237,9 +237,10 @@ namespace EDCHOST24
                     mCar_1.AddNonGatePunish();
                 }
 
-                if ((IsInObstacle(mCar_1) && mCar_1.m))
+                if ((IsInObstacle(mCar_1) && mCar_1.mIsInObstacle) ||
+                    (!IsInObstacle(mCar_1) && !mCar_1.mIsInObstacle))
                 {
-
+                    mCar_1.
                 }
             }
             else if (mCamp = Camp.B)
@@ -258,17 +259,7 @@ namespace EDCHOST24
         ***********************************************/
         private bool IsOutOfCompetitionArea(Car _car)
         {
-            Dot CarPos = _car.mPos;
-
-            if (CarPos.x <= AVAILIABLE_MIN_X || CarPos.x >= AVAILIABLE_MAX_X ||
-                CarPos.y <= AVAILIABLE_MIN_Y || CarPos.y >= AVAILIABLE_MAX_Y)
-            {
-                return true;
-            }
-            else
-            {
-                return true;
-            }
+            
         }
 
         private bool IsInObstacle (Car _car)

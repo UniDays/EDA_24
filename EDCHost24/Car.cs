@@ -145,6 +145,11 @@ namespace EDCHOST24
 
         }
 
+        public void InObstacle ()
+        {
+            
+        }
+
         private void UpdateScore()
         {
             MyScore = mIsAbleToRun * RUN_CREDIT
