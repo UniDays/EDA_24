@@ -13,24 +13,27 @@ namespace EDCHOST22
     };
     public class Car //选手的车
     {
-        public const int RUN_CREDIT = 10;        //小车启动可以得到10分;
-        public const int ARRIVE_CREDIT = 20;     //规定时间内送达外卖可以得到20分;
-        public const int CHARGE_CREDIT = 5;      //放置一个充电站可以得到5分;
-        public const int LATE_PENALTY = 5;       //外卖超时1秒惩罚5分;
-        public const int NON_GATE_PENALTY = 10;  //未经过规定出入口出入惩罚10分;
-        public const int FOUL_PENALTY = 50;      //一个惩罚标记扣分50分;
-        public const int MAX_PKG_COUNT = 5;      //车上最多携带的包裹数量
-        public const int MAX_CHARGER_COUNT = 3;  //小车最多放置的充电桩数量
+        public const int RUN_CREDIT = 10;          //小车启动可以得到10分;
+        public const int PICK_CREDIT = 5;          //接到一笔订单得5分;
+        public const int ARRIVE_EASY_CREDIT = 20;  //规定时间内送达外卖可以得到20/25/30分;
+        public const int ARRIVE_NORMAL_CREDIT = 25;
+        public const int ARRIVE_HARD_CREDIT = 30;
+        public const int CHARGE_CREDIT = 5;        //放置一个充电站可以得到5分;
+        public const int LATE_PENALTY = 5;         //外卖超时1秒惩罚5分;
+        public const int IGNORE_PENALTY = 5;       //未接单惩罚5分;
+        public const int NON_GATE_PENALTY = 10;    //未经过规定出入口出入惩罚10分;
+        public const int FOUL_PENALTY = 50;        //一个惩罚标记扣分50分;
+        public const int MAX_PKG_COUNT = 5;        //车上最多携带的包裹数量
+        public const int MAX_CHARGER_COUNT = 3;    //小车最多放置的充电桩数量
 
         public Dot mPos;
         public Dot mLastPos;
         public Dot mLastOneSecondPos;
         public Dot mTransPos;
         public Camp MyCamp;               //A or B get、set直接两个封装好的函数
-
         public int MyScore;               //得分
-        
         public int mIsAbleToRun;          //小车是否能成功启动 0不能启动，1能启动
+        public int mPickCount;            //小车接到的订单数量
         public int mArrivalCount;         //小车成功在规定时间内送达外卖个数
         public int mTaskState;            //小车任务 0为上半场任务，1为下半场任务
         public int mPkgCount;             //小车上放有外卖个数
@@ -45,7 +48,7 @@ namespace EDCHOST22
         public int mRightPos;             //小车现在的位置信息是否是正确的，0为不正确的，1为正确的
         public int mRightPosCount;        //用于记录小车位置是否该正确了
         */
-
+        public List<Package> mPickedPackages;
 
         public Car(Camp c, int task)
         {
@@ -56,6 +59,7 @@ namespace EDCHOST22
             mTransPos = new Dot(0, 0);
             MyScore = 0;
             mIsAbleToRun = 0;
+            mPickCount = 0;
             mArrivalCount = 0;
             mTaskState = task;
             mPkgCount = 0;
@@ -65,6 +69,7 @@ namespace EDCHOST22
             mIsInField = 0;
             mIsInCharge = 0;
             mFoulCount = 0;
+            mPickedPackages = new List<Package>();
             //mRightPos = 1;
             //mRightPosCount = 0;
         }
@@ -78,12 +83,7 @@ namespace EDCHOST22
             mPos = pos;
         }
 
-        public void AddLatePunish()   //扣分
-        {
-            mLateSeconds++;
-            UpdateScore();
-        }
-        public void AddNonGatePunish()
+        public void AddNonGatePunish() //扣分
         {
             mNonGateCount++; 
             UpdateScore();
@@ -93,13 +93,8 @@ namespace EDCHOST22
             mFoulCount++;
             UpdateScore();
         }
-        public void AddArrivalCount()  //得分
-        {
-            mArrivalCount++;
-            UpdateScore();
-        }
 
-        public void AddChargeCount()
+        public void AddChargeCount()   //放置充电站得分
         {
             if (mChargeCount < MAX_CHARGER_COUNT)
             {
@@ -112,28 +107,38 @@ namespace EDCHOST22
             mIsAbleToRun = 1;
             UpdateScore();
         }
-        public void PickPackage()      //拾取外卖
+        public void PickPackage(Package NewPackage)      //拾取外卖
         {
             if (mPkgCount < MAX_PKG_COUNT)
             {
+                NewPackage.PickPackage();
+                mPickedPackages.Add(NewPackage);
                 mPkgCount++;
+                mPickCount++;
+                UpdateScore();
             }
         }
-        public void DropPackage()      //送达外卖
+
+        public void DropPackage(Package PickedPackage)      //送达外卖 
         {
             if (mPkgCount > 0)
             {
+                PickedPackage.DropPackage();
+                UpdateScore();
                 mPkgCount--;
             }
         }
         public void UpdateScore()
         {
             MyScore = mIsAbleToRun * RUN_CREDIT
-                + mArrivalCount * ARRIVE_CREDIT
+                + mPickCount * PICK_CREDIT
                 + mChargeCount * CHARGE_CREDIT
-                - mLateSeconds * LATE_PENALTY
                 - mNonGateCOunt * NON_GATE_PENALTY
                 - mFoulCount * FOUL_PENALTY;
+            foreach(Package i in mPickedPackages)
+            {
+                MyScore += i.GetPackageScore();
+            }
         }
     }
 }
