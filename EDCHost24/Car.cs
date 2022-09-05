@@ -175,6 +175,7 @@ namespace EDCHOST24
             
         }
 
+<<<<<<< Updated upstream
         public int GetScore ()
         {
 
@@ -186,6 +187,14 @@ namespace EDCHOST24
         public Dot GetCarPos (int _type)
         {
 
+=======
+        //type ==0, position now
+        //type ==1, position in previous frame
+        //tpye ==2, postion one second before
+        public Dot GetPos (int _type = 0)
+        {
+            
+>>>>>>> Stashed changes
         }
 
         private void UpdateScore()
