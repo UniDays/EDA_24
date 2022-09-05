@@ -184,7 +184,7 @@ namespace EDCHOST24
         // type == 0, position now
         // type == 1, position in the previous frame
         // type == 2, position one second before
-        public Dot GetCarPos (int _type)
+        public Dot GetCarPos (int _type = 0)
         {
 
         }

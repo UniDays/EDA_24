@@ -115,10 +115,7 @@ namespace EDCHOST24
             _UpdateGameTime();
 
             // Try to generate packages on each refresh
-            if (!GeneratePackage())
-            {
-                Debug.WriteLine("Package generation is not allowed at this stage");
-            }
+            GeneratePackage();
 
             // Team A is on racing
             if (mCamp == Camp.A)
