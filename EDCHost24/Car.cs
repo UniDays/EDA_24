@@ -162,7 +162,7 @@ namespace EDCHOST24
 
         public void InObstacle ()
         {
-
+            
         }
 
         public void InOpponentStation()

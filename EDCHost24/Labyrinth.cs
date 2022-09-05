@@ -19,6 +19,7 @@ namespace EDCHOST24
         // 障碍物是否已经被设置
         public bool IsLabySet;
 
+
         // 默认构造函数
         public Labyrinth()
         {
@@ -90,6 +91,23 @@ namespace EDCHOST24
                 // 将得到的文件名放入到list中
                 LabyName.Add(fsinfo.Name); 
             }
+        }
+
+        // 判断是否与障碍发生碰撞
+        public static bool isCollided(Dot CarPos, int radius = 0)
+        {
+            if (radius < 0)
+            {
+                radius = 0;
+            }
+            foreach(Wall wall in mLabyrinth.mpWallList)
+            {
+                if (Utility.DistanceL(wall, CarPos) < radius)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
