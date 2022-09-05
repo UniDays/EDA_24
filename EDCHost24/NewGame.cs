@@ -18,10 +18,10 @@ namespace EDCHOST24
     {
         // size of competition area
         public const int MAX_SIZE = 254;
-        public const int AVAILIABLE_MAX_X = 222;
-        public const int AVAILIABLE_MIN_X = 32;
-        public const int AVAILIABLE_MAX_Y = 222;
-        public const int AVAILIABLE_MIN_Y = 32;
+        public const int AVAILIABLE_MAX_X = 254;
+        public const int AVAILIABLE_MIN_X = 0;
+        public const int AVAILIABLE_MAX_Y = 254;
+        public const int AVAILIABLE_MIN_Y = 0;
 
         // size of car
         public const int COLLISION_RADIUS = 8;
@@ -46,12 +46,15 @@ namespace EDCHOST24
 
         // car and package
         public Car mCar_1, mCar_2;
+        public int mScore_1, mScore_2;
         private PackageList mPackagesFirst;
         private PackageList mPackagesSecond;
+        public Station mChargeStation_1;
+        public Station mChargeStation_2;
 
         public List<Package> mPackagesRemain;
 
-        // which team is racing A/B
+        // which team is racing A or B
         public Camp mCamp;
 
         // obstacle
@@ -74,6 +77,7 @@ namespace EDCHOST24
             mGameState = GameState.UNSTART;
             mGameStage = GameStage.FIRST_HALF;
 
+            // Default
             mCamp = Camp.A;
 
             CarA = new Car(Camp.A, 0);
@@ -85,9 +89,12 @@ namespace EDCHOST24
             mPackagesSecond = new PackageList(AVAILIABLE_MAX_X, AVAILIABLE_MIN_X, 
                         AVAILIABLE_MAX_Y, AVAILIABLE_MIN_Y, INITIAL_PKG_NUM, FIRST_HALF_TIME, TIME_INTERVAL);
 
+            mChargeStation_1 = new Station ();
+            mChargeStation_2 = new Station ();
+
             mPackagesRemain = new List<Package> ();
 
-            mStartTime = GetCurrentTime();
+            mStartTime = _GetCurrentTime();
             mGameTime = 0;
 
             mObstacle = new Obstacle();
@@ -101,30 +108,79 @@ namespace EDCHOST24
 
 
         /***********************************************
-        Time
+        Update Parameters
         ***********************************************/
-        public void UpdateGameTime ()
+        public void Update()
         {
-            mGameTime = GetCurrentTime() - mStartTime;
+            _UpdateGameTime();
+
+            // Try to generate packages on each refresh
+            if (!GeneratePackage())
+            {
+                Debug.WriteLine("Package generation is not allowed at this stage");
+            }
+
+            // Team A is on racing
+            if (mCamp == Camp.A)
+            {
+
+            }
+            else if (mCamp == Camp.B)
+            {
+
+            }
+
+            
         }
 
-        private static int GetCurrentTime()
+
+        /***********************************************
+        Change the team
+        ***********************************************/
+        public void SetCamp(int _whichone) 
         {
-            System.DateTime currentTime = System.DateTime.Now;
-            int time = currentTime.Hour * 3600000 + currentTime.Minute * 60000 + currentTime.Second * 1000;
-            //Debug.WriteLine("H, M, S: {0}, {1}, {2}", currentTime.Hour, currentTime.Minute, currentTime.Second);
-            //Debug.WriteLine("GetCurrentTime，Time = {0}", time); 
-            return time;
+            if (_whichone == 0)
+            {
+                mCamp = Camp.A;
+                mPackagesRemain.Clear();
+                _InitialPackagesRemain();
+                Debug.WriteLine("Team A is going to race");
+            }
+            else if (_whichone == 1)
+            {
+                mCamp = Camp.B;
+                mPackagesRemain.Clear();
+                _InitialPackagesRemain();
+                Debug.WriteLine("Team B is going to race");
+            }
+            else
+            {
+                Debug.WriteLine("Expect 0 or 1, but input is out of range");
+            }
         }
 
+        /***********************************************
+        Enter the Second Half
+        ***********************************************/
+        public void EnterSecondHalf()
+        {
+            mGameStage = GameStage.SENCOND_HALF;
+            mScore_1 = mCar_1.GetScore();
+            mScore_2 = mCar_2.GetScore();
+            mCar_1.Reset();
+            mCar_2.Reset();
+
+            mPackagesRemain.Clear();
+
+            Debug.WriteLine("GameStage has been set to SECOND_HALF");
+            Debug.WriteLine("The score of car has been save");
+        }
 
         /***********************************************
         Initialize and Generate Package
         ***********************************************/
         public bool GeneratePackage ()
         {
-            UpdateGameTime();
-
             if (mGameStage == GameStage.FIRST_HALF && 
                 mGameTime >= mPackagesFirst.NextGenerationTime)
             {
@@ -138,30 +194,6 @@ namespace EDCHOST24
                 return true;
             }
             else
-            {
-                return false;
-            }
-        }
-
-        public bool InitialPackages()
-        {
-            if (mGameStage == GameStage.FIRST_HALF)
-            {
-                for (int i = 0;i < mPackagesFirst.Amount;i++)
-                {
-                    mPackagesRemain.Add(mPackagesFirst.Index(i));
-                }
-                return true;
-            }
-            else if (mGameStage == GameStage.SENCOND_HALF)
-            {
-                for (int i = 0;i < mPackagesSecond.Amount;i++)
-                {
-                    mPackagesRemain.Add(mPackagesSecond.Index(i));
-                }
-                return true;
-            }
-            else 
             {
                 return false;
             }
@@ -182,7 +214,6 @@ namespace EDCHOST24
                         mCar_1.PickPackage(pkg);
                     }
                 }
-
             } 
             else if (mCamp == Camp.B)
             {
@@ -223,75 +254,152 @@ namespace EDCHOST24
 
 
         /***********************************************
-        Judge whether the car is in illegal area 
-        i.e Out of Compertion Area, in Obstacle Area, in Opponent's Charge Station
+        Set Charge Station
         ***********************************************/
-        public void CheckLocation()
+        public void SetChargeStation ()
         {
-            if (mCamp = Camp.A)
+            if (mCamp == Camp.A)
             {
-                // car's position state changed
-                if ((IsOutOfCompetitionArea(mCar_1) && mCar_1.mIsInField) ||
-                    (!IsOutOfCompetitionArea(mCar_1) && !mCar_1.mIsInField) )
-                {
-                    mCar_1.AddNonGatePunish();
-                }
-
-                if ((IsInObstacle(mCar_1) && mCar_1.mIsInObstacle) ||
-                    (!IsInObstacle(mCar_1) && !mCar_1.mIsInObstacle))
-                {
-                    mCar_1.InObstacle();
-                }
-
-                if (mGameStage == GameStage.SENCOND_HALF && 
-                ((IsInOpponentStation(mCar_1) && mCar_1.mIsInOpponentChargeStation) ||
-                    (!IsInObstacle(mCar_1) && !mCar_1.mIsInOpponentChargeStation)))
-                {
-                    mCar_1.InOpponentStation();
-                }
-
-                
-            }
-            else if (mCamp = Camp.B)
+                _SetChargeStation(mCar_1);
+            } 
+            else if (mCamp == Camp.B)
             {
-                if ((IsOutOfCompetitionArea(mCar_2) && mCar_2.mIsInField) ||
-                    (!IsOutOfCompetitionArea(mCar_2) && !mCar_2.mIsInField) )
-                {
-                    mCar_2.AddNonGatePunish();
-                }
-
-                if ((IsInObstacle(mCar_2) && mCar_2.mIsInObstacle) ||
-                    (!IsInObstacle(mCar_2) && !mCar_2.mIsInObstacle))
-                {
-                    mCar_2.InObstacle();
-                }
-
-                if (mGameStage == GameStage.SENCOND_HALF && 
-                ((IsInOpponentStation(mCar_2) && mCar_2.mIsInOpponentChargeStation) ||
-                    (!IsInObstacle(mCar_2) && !mCar_2.mIsInOpponentChargeStation)))
-                {
-                    mCar_2.InOpponentStation();
-                }
+                _SetChargeStation(mCar_2);
             }
         }
+
 
 
         /***********************************************
-        Private Function
+        Get Penalty for accessing illegal area
+        i.e Out of Competition Area, in Obstacle Area, in Opponent's Charge Station
         ***********************************************/
-        private bool IsOutOfCompetitionArea(Car _car)
+        public void GetPenalty()
+        {
+            if (mCamp == Camp.A)
+            {
+                _Penalty(mCar_1);
+            }
+            else if (mCamp == Camp.B)
+            {
+                _Penalty(mCar_2);
+            }
+        }
+
+
+
+
+
+
+        /***********************************************************************
+        Private Functions
+        ***********************************************************************/
+
+        /***********************************************
+        Initialize Packages Remain
+        ***********************************************/
+        private bool _InitialPackagesRemain()
+        {
+            if (mGameStage == GameStage.FIRST_HALF)
+            {
+                for (int i = 0;i < mPackagesFirst.Amount;i++)
+                {
+                    mPackagesRemain.Add(mPackagesFirst.Index(i));
+                }
+                return true;
+            }
+            else if (mGameStage == GameStage.SENCOND_HALF)
+            {
+                for (int i = 0;i < mPackagesSecond.Amount;i++)
+                {
+                    mPackagesRemain.Add(mPackagesSecond.Index(i));
+                }
+                return true;
+            }
+            else 
+            {
+                return false;
+            }
+        }
+
+        /***********************************************
+        Penalty for Access illegal Area
+        ***********************************************/
+        private void _Penalty (ref Car _car)
+        {
+            if ((_IsOutOfCompetitionArea(_car) && _car.mIsInField) ||
+                (!_IsOutOfCompetitionArea(_car) && !_car.mIsInField) )
+            {
+                _car.AddNonGatePunish();
+            }
+
+            if ((_IsInObstacle(_car) && _car.mIsInObstacle) ||
+                (!_IsInObstacle(_car) && !_car.mIsInObstacle))
+            {
+                _car.InObstacle();
+            }
+
+            if (mGameStage == GameStage.SENCOND_HALF && 
+                ((_IsInOpponentStation(_car) && _car.mIsInOpponentChargeStation) ||
+                (!_IsInObstacle(_car) && !_car.mIsInOpponentChargeStation)))
+            {
+                _car.InOpponentStation();
+            }
+        }
+
+        private bool _IsOutOfCompetitionArea(Car _car)
         {
             
         }
 
-        private bool IsInObstacle (Car _car)
+        private bool _IsInObstacle (Car _car)
         {
             
         }
 
-        private bool IsInOpponentStation (Car _car)
+        private bool _IsInOpponentStation (Car _car)
         {
             
+        }
+
+        /***********************************************
+        Set Charge Station in First-Half
+        ***********************************************/
+        private void _SetChargeStation (ref Car _car) 
+        {
+            if (mGameStage == GameStage.SENCOND_HALF) 
+            {
+                return;
+            }
+
+            if (_car.AddChargeCount())
+            {
+                if (_car.MyCamp == Camp.A)
+                {
+                    mChargeStation_1.Add(mCar_1);
+                }
+                else if (_car.MyCamp == Camp.B)
+                {
+                    mChargeStation_2.Add(mCar_2);
+                }
+            }
+        }
+
+        /***********************************************
+        Time
+        ***********************************************/
+        private static int _GetCurrentTime()
+        {
+            System.DateTime currentTime = System.DateTime.Now;
+            int time = currentTime.Hour * 3600000 + currentTime.Minute * 60000 + currentTime.Second * 1000;
+            //Debug.WriteLine("H, M, S: {0}, {1}, {2}", currentTime.Hour, currentTime.Minute, currentTime.Second);
+            //Debug.WriteLine("GetCurrentTime，Time = {0}", time); 
+            return time;
+        }
+
+        private void _UpdateGameTime ()
+        {
+            mGameTime = _GetCurrentTime() - mStartTime;
         }
     }
 

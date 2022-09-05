@@ -26,6 +26,10 @@ namespace EDCHOST24
         public const int MAX_PKG_COUNT = 5;        //车上最多携带的包裹数量
         public const int MAX_CHARGER_COUNT = 3;    //小车最多放置的充电桩数量
 
+
+        public Queue<Dot> mQueuePos;
+
+
         public Dot mPos;
         public Dot mLastPos;
         public Dot mLastOneSecondPos;
@@ -77,6 +81,12 @@ namespace EDCHOST24
             //mRightPos = 1;
             //mRightPosCount = 0;
         }
+
+        public void Update()
+        {
+
+        }
+
         public void UpdateLastPos()
         {
             mLastPos = mPos;
@@ -100,13 +110,16 @@ namespace EDCHOST24
             UpdateScore();
         }
 
-        public void AddChargeCount()   //放置充电站得分
+        public bool AddChargeCount()   //放置充电站得分
         {
             if (mChargeCount < MAX_CHARGER_COUNT)
             {
             mChargeCount++;
             UpdateScore();
+            return true;
             }
+
+            return false;
         }
         public void CarRun()           //小车启动
         {
@@ -142,7 +155,7 @@ namespace EDCHOST24
         }
 
         // ExtraDistance is in cm
-        public void RunOutOfPower (int _ExtraDistance)
+        public void IsOutOfPower (int _ExtraDistanceOnEachRefresh)
         {
 
         }
@@ -154,7 +167,17 @@ namespace EDCHOST24
 
         public void InOpponentStation()
         {
+
+        }
+
+        public void Reset ()
+        {
             
+        }
+
+        public int GetScore ()
+        {
+
         }
 
         private void UpdateScore()

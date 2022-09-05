@@ -1,6 +1,6 @@
-#include"zigbee.h"
-volatile uint8_t zigbeeReceive[ZIGBEE_MESSAGE_LENTH];	//ÊµÊ±¼ÇÂ¼ÊÕµ½µÄÐÅÏ¢
-volatile uint8_t zigbeeMessage[ZIGBEE_MESSAGE_LENTH];//¾­¹ýÕûÀíË³ÐòºóµÃµ½µÄÐÅÏ¢
+#include "zigbee.h"
+volatile uint8_t zigbeeReceive[ZIGBEE_MESSAGE_LENTH];	//ÊµÊ±ï¿½ï¿½Â¼ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+volatile uint8_t zigbeeMessage[ZIGBEE_MESSAGE_LENTH];//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë³ï¿½ï¿½ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 volatile int message_index = 0;
 volatile int message_head = -1;
 uint8_t zigbeeBuffer[1];
@@ -8,13 +8,13 @@ uint8_t zigbeeBuffer[1];
 UART_HandleTypeDef* zigbee_huart;
 
 
-volatile struct BasicInfo Game;//´¢´æ±ÈÈü×´Ì¬¡¢Ê±¼ä¡¢Ð¹ºé¿ÚÐÅÏ¢
-volatile struct CarInfo Car;//´¢´æ³µÁ¾ÐÅÏ¢
-volatile struct PassengerInfo Passenger;//´¢´æÈËÔ±µÄÐÅÏ¢¡¢Î»ÖÃºÍËÍ´ïÎ»ÖÃ
-volatile struct PackageInfo Package[6];//´¢´æ·ÀÑ´Îï×ÊµÄÐÅÏ¢
-volatile struct FloodInfo Flood[5];//´¢´æÐ¹ºé¿ÚÎ»ÖÃÐÅÏ¢
-volatile struct ObstacleInfo Obstacle[8];//´¢´æÐéÄâÕÏ°­ÐÅÏ¢
-/***********************½Ó¿Ú****************************/
+volatile struct BasicInfo Game;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½Ê±ï¿½ä¡¢Ð¹ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+volatile struct CarInfo Car;//ï¿½ï¿½ï¿½æ³µï¿½ï¿½ï¿½ï¿½Ï¢
+volatile struct PassengerInfo Passenger;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô±ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½Î»ï¿½Ãºï¿½ï¿½Í´ï¿½Î»ï¿½ï¿½
+volatile struct PackageInfo Package[6];//ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½Ï¢
+volatile struct FloodInfo Flood[5];//ï¿½ï¿½ï¿½ï¿½Ð¹ï¿½ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½Ï¢
+volatile struct ObstacleInfo Obstacle[8];//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ï¿½ï¿½Ï¢
+/***********************ï¿½Ó¿ï¿½****************************/
 void zigbee_Init(UART_HandleTypeDef *huart)
 {
 	zigbee_huart = huart;
@@ -23,10 +23,10 @@ void zigbee_Init(UART_HandleTypeDef *huart)
 void zigbeeMessageRecord(void)
 {
 	zigbeeMessage[message_index] = zigbeeBuffer[0];
-	message_index = receiveIndexAdd(message_index, 1);    //Ò»¸ö¼òµ¥µÄË÷ÒýÊýÔö¼Óº¯Êý
+	message_index = receiveIndexAdd(message_index, 1);    //Ò»ï¿½ï¿½ï¿½òµ¥µï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Óºï¿½ï¿½ï¿½
 
 	if (zigbeeMessage[receiveIndexMinus(message_index, 2)] == 0x0D
-		&& zigbeeMessage[receiveIndexMinus(message_index, 1)] == 0x0A)//Ò»´®ÐÅÏ¢µÄ½áÎ²
+		&& zigbeeMessage[receiveIndexMinus(message_index, 1)] == 0x0A)//Ò»ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½Ä½ï¿½Î²
 	{
 		if (receiveIndexMinus(message_index, message_head) == 0)
 		{
@@ -179,19 +179,19 @@ uint16_t getCararea()
 {
 		return (uint16_t)Car.area;
 }
-uint16_t getObstacleAposX(int ObstacleNo)		    //ÐéÄâÕÏ°­Ax×ø±ê
+uint16_t getObstacleAposX(int ObstacleNo)		    //ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½Axï¿½ï¿½ï¿½ï¿½
 {	
 	  return (uint16_t)Obstacle[ObstacleNo].posA.X;
 }
-uint16_t getObstacleAposY(int ObstacleNo)		    //ÐéÄâÕÏ°­Ax×ø±ê
+uint16_t getObstacleAposY(int ObstacleNo)		    //ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½Axï¿½ï¿½ï¿½ï¿½
 {
     return (uint16_t)Obstacle[ObstacleNo].posA.Y;
 }
-uint16_t getObstacleBposX(int ObstacleNo)		    //ÐéÄâÕÏ°­Ax×ø±ê
+uint16_t getObstacleBposX(int ObstacleNo)		    //ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½Axï¿½ï¿½ï¿½ï¿½
 {
     return (uint16_t)Obstacle[ObstacleNo].posB.X;
 }
-uint16_t getObstacleBposY(int ObstacleNo)	    //ÐéÄâÕÏ°­Ax×ø±ê
+uint16_t getObstacleBposY(int ObstacleNo)	    //ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½Axï¿½ï¿½ï¿½ï¿½
 {
     return (uint16_t)Obstacle[ObstacleNo].posB.Y;
 }
