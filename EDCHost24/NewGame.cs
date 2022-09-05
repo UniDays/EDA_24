@@ -107,7 +107,6 @@ namespace EDCHOST24
         }
 
 
-<<<<<<< Updated upstream
         /***********************************************
         Update Parameters
         ***********************************************/
@@ -176,8 +175,6 @@ namespace EDCHOST24
             Debug.WriteLine("GameStage has been set to SECOND_HALF");
             Debug.WriteLine("The score of car has been save");
         }
-=======
->>>>>>> Stashed changes
 
         /***********************************************
         Initialize and Generate Package
@@ -256,14 +253,11 @@ namespace EDCHOST24
         }
 
 
-        /***********************************************
-<<<<<<< Updated upstream
-        Set Charge Station
-        ***********************************************/
-        public void SetChargeStation ()
-=======
-        Private Function
-        ***********************************************/
+        
+        /***********************************************************************
+        Private Functions
+        ***********************************************************************/
+
 
         /***********************************************
         Time
@@ -283,24 +277,6 @@ namespace EDCHOST24
         }
 
 
-        /***********************************************
-        Judge whether the car is in illegal area 
-        i.e Out of Compertion Area, in Obstacle Area, in Opponent's Charge Station
-        ***********************************************/
-        private void _PositionPenalty()
->>>>>>> Stashed changes
-        {
-            if (mCamp == Camp.A)
-            {
-                _SetChargeStation(mCar_1);
-            } 
-            else if (mCamp == Camp.B)
-            {
-                _SetChargeStation(mCar_2);
-            }
-        }
-
-
 
         /***********************************************
         Get Penalty for accessing illegal area
@@ -317,15 +293,6 @@ namespace EDCHOST24
                 _Penalty(mCar_2);
             }
         }
-
-
-
-
-
-
-        /***********************************************************************
-        Private Functions
-        ***********************************************************************/
 
         /***********************************************
         Initialize Packages Remain
@@ -354,7 +321,6 @@ namespace EDCHOST24
             }
         }
 
-<<<<<<< Updated upstream
         /***********************************************
         Penalty for Access illegal Area
         ***********************************************/
@@ -381,9 +347,6 @@ namespace EDCHOST24
         }
 
         private bool _IsOutOfCompetitionArea(Car _car)
-=======
-        private bool IsOutOfCompetitionArea(Car _car)
->>>>>>> Stashed changes
         {
             
         }

@@ -17,7 +17,7 @@ namespace EDCHOST24
         } //num复位
         public Station() //构造函数
         { 
-            list<Dot> mStationList = new list<Dot>();
+            List<Dot> mStationList = new List<Dot>();
         }
         public void Add(Dot _inPos)
         {
