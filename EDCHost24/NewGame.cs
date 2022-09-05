@@ -58,7 +58,7 @@ namespace EDCHOST24
         public Camp mCamp;
 
         // obstacle
-        public Obstacle mObstacle;
+        public Labyrinth mObstacle;
 
         // Record the time when the trolley enters the area
         public Dot mLastPos;
@@ -376,11 +376,11 @@ namespace EDCHOST24
             {
                 if (_car.MyCamp == Camp.A)
                 {
-                    mChargeStation_1.Add(mCar_1);
+                    mChargeStation_1.Add(mCar_1.GetCarPos(0));
                 }
                 else if (_car.MyCamp == Camp.B)
                 {
-                    mChargeStation_2.Add(mCar_2);
+                    mChargeStation_2.Add(mCar_2.GetCarPos(0));
                 }
             }
         }

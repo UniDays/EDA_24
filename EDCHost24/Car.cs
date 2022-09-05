@@ -154,7 +154,7 @@ namespace EDCHOST24
 
         }
 
-        // ExtraDistance is in cm
+        // ExtraDistanceOnEachRefresh is in cm
         public void IsOutOfPower (int _ExtraDistanceOnEachRefresh)
         {
 
@@ -176,6 +176,14 @@ namespace EDCHOST24
         }
 
         public int GetScore ()
+        {
+
+        }
+        
+        // type == 0, position now
+        // type == 1, position in the previous frame
+        // type == 2, position one second before
+        public Dot GetCarPos (int _type)
         {
 
         }
