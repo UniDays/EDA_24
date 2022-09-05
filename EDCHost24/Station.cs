@@ -20,6 +20,18 @@ namespace EDCHOST22
             num = Num;
             list<Dot> mStationList = new list<Dot>();
         }
+
+        public static bool isCollided(Dot CarPos, int radius)
+        {
+            foreach(Dot dot in mStationList)
+            {
+                if (Utility.DistanceP(CarPos, dot) < radius)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
 }
