@@ -11,8 +11,9 @@ using System.Diagnostics;
 namespace EDCHOST24
 {
     // Token
-    public enum GameState { UNSTART = 0, RUN = 1, PAUSE = 2, END = 3 };
-    public enum GameStage { FIRST_HALF = 0,  SENCOND_HALF= 1, END = 2};
+    public enum GameState { UNSTART = 0, RUN = 1};
+
+    public enum GameStage { PREPARATION = 0, FIRST_HALF = 1,  SENCOND_HALF= 2, END = 3};
 
     public class Game
     {
@@ -40,154 +41,205 @@ namespace EDCHOST24
         public GameState mGameState;
 
         // Time
-        // Set time zero as the start time of each half
-        public int mStartTime; // system time, update for each half
-        public int mGameTime;
+        // Set time zero as the start time of each race
+        private int mStartTime; // system time, update for each race
+        private int mGameTime;
 
         // car and package
-        public Car mCar_1, mCar_2;
-        public int mScore_1, mScore_2;
-        private PackageList mPackagesFirst;
-        private PackageList mPackagesSecond;
-        public Station mChargeStation_1;
-        public Station mChargeStation_2;
+        private Car mCarA, mCarB;
 
-        public List<Package> mPackagesRemain;
+        private int[] mScoreA, mScoreB;
+
+        private PackageList mPackageFirstHalf;
+        private PackageList mPackageSecondHalf;
+
+        // store the packages on the field
+        private List<Package> mPackagesRemain;
+
+        // Charge station set by Team A and B
+        private Station mChargeStationA;
+        private Station mChargeStationB;
 
         // which team is racing A or B
-        public Camp mCamp;
+        private Camp mCamp;
 
         // obstacle
-        public Labyrinth mObstacle;
-
-        // Record the time when the trolley enters the area
-        public Dot mLastPos;
-
-        public int mLastWrongAreaTime;
-        public int mLastOnObstacleTime;
-        public int mLastOnStationTime;
+        private Labyrinth mObstacle;
 
         
-
-
+        /***********************************************
+        Constructor
+        No parameter needs
+        ***********************************************/
         public Game()
         {
             Debug.WriteLine("Call Constructor of Game");
 
             mGameState = GameState.UNSTART;
-            mGameStage = GameStage.FIRST_HALF;
+            mGameStage = GameStage.PREPARATION;
 
-            // Default
-            mCamp = Camp.A;
+            mCamp = Camp.NONE;
 
-            CarA = new Car(Camp.A, 0);
-            CarB = new Car(Camp.B, 0);
+            mCarA = new Car(Camp.A, 0);
+            mCarB = new Car(Camp.B, 0);
 
-            mPackagesFirst = new PackageList(AVAILIABLE_MAX_X, AVAILIABLE_MIN_X, 
+            mScoreA = new int() {0,0};
+            mScoreB = new int() {0.0};
+
+            // Generate the package series for first and second half
+            mPackageFirstHalf = new PackageList(AVAILIABLE_MAX_X, AVAILIABLE_MIN_X, 
                         AVAILIABLE_MAX_Y, AVAILIABLE_MIN_Y, INITIAL_PKG_NUM, FIRST_HALF_TIME, TIME_INTERVAL);
+            mPackageSecondHalf = new PackageList(AVAILIABLE_MAX_X, AVAILIABLE_MIN_X, 
+                        AVAILIABLE_MAX_Y, AVAILIABLE_MIN_Y, INITIAL_PKG_NUM, SECOND_HALF_TIME, TIME_INTERVAL);
 
-            mPackagesSecond = new PackageList(AVAILIABLE_MAX_X, AVAILIABLE_MIN_X, 
-                        AVAILIABLE_MAX_Y, AVAILIABLE_MIN_Y, INITIAL_PKG_NUM, FIRST_HALF_TIME, TIME_INTERVAL);
-
-            mChargeStation_1 = new Station ();
-            mChargeStation_2 = new Station ();
+            mChargeStationA = new Station ();
+            mChargeStationB = new Station ();
 
             mPackagesRemain = new List<Package> ();
 
-            mStartTime = _GetCurrentTime();
-            mGameTime = 0;
+            mStartTime = -1;
+            mGameTime = -1;
 
             mObstacle = new Obstacle();
-
-            mLastPos = Dot(-1, -1);
-
-            mLastWrongAreaTime = -1;
-            mLastOnObstacleTime = -1;
-            mLastOnStationTime = -1;
         }
 
 
         /***********************************************
-        Update Parameters
+        Update on each frame
         ***********************************************/
-        public void Update()
+        public void UpdateOnEachFrame(Dot _CarPos)
         {
             _UpdateGameTime();
 
             // Try to generate packages on each refresh
-            GeneratePackage();
+            _GeneratePackage();
 
             // Team A is on racing
             if (mCamp == Camp.A)
             {
-
+                
             }
             else if (mCamp == Camp.B)
             {
 
-            }
-
-            
+            }  
         }
 
-
-        /***********************************************
-        Change the team
-        ***********************************************/
-        public void SetCamp(int _whichone) 
+        // decide which team and stage is going on
+        public void Start (Camp _camp, GameStage _GameStage)
         {
-            if (_whichone == 0)
+            if (mGameState == GameState.RUN)
             {
-                mCamp = Camp.A;
-                mPackagesRemain.Clear();
-                _InitialPackagesRemain();
-                Debug.WriteLine("Team A is going to race");
+                Debug.WriteLine("Failed! The current game is going on");
+                return;
             }
-            else if (_whichone == 1)
+
+            if (_GameStage != GameStage.FIRST_HALF || _GameStage != GameStage.SENCOND_HALF)
             {
-                mCamp = Camp.B;
-                mPackagesRemain.Clear();
-                _InitialPackagesRemain();
-                Debug.WriteLine("Team B is going to race");
+                Debug.WriteLine("Failed to change game stage! Expect input to be GameStage.FIRST_HALF or GameStage.SECOND_HALF");
             }
-            else
+
+            // set state param of game
+            mGameState =  GameState.RUN;
+            mGameStage = _GameStage;
+            mCamp = _camp;
+
+            if (mCamp == Camp.A)
             {
-                Debug.WriteLine("Expect 0 or 1, but input is out of range");
+                mScoreA[(int)mGameStage - 1] = 0;
             }
+            else if (mCamp == Camp.B)
+            {
+                mScoreB[(int)mGameStage - 1] = 0;
+            }
+
+            // initial packages on the field
+            _InitialPackagesRemain();
+
+            mStartTime = _GetCurrentTime();
+            mGameTime = 0;
         }
 
-        /***********************************************
-        Enter the Second Half
-        ***********************************************/
-        public void EnterSecondHalf()
+        public void End ()
         {
-            mGameStage = GameStage.SENCOND_HALF;
-            mScore_1 = mCar_1.GetScore();
-            mScore_2 = mCar_2.GetScore();
-            mCar_1.Reset();
-            mCar_2.Reset();
+            if (mGameState != GameState.RUN)
+            {
+                Debug.WriteLine("Failed! There is no game going on");
+            }
+
+            //Reset Car and Save Score
+            if (mCamp == Camp.A)
+            {
+                mScoreA[(int)mGameStage - 1] = mCarA.GetScore();
+                mCarA.Reset();
+            } else if (mCamp == Camp.B)
+            {
+                mScoreA[(int)mGameStage - 1] = mCarA.GetScore();
+                mCarB.Reset();
+            }
+
+            // set state param of game
+            mGameState = GameState.UNSTART;
+            mGameStage = GameStage.PREPARATION;
+            mCamp = Camp.NONE;
 
             mPackagesRemain.Clear();
 
-            Debug.WriteLine("GameStage has been set to SECOND_HALF");
-            Debug.WriteLine("The score of car has been save");
+            mStartTime = -1;
+            mGameTime = -1;
         }
+
+
+
+
+         /***********************************************************************
+        Private Functions
+        ***********************************************************************/
+
+
+
 
         /***********************************************
         Initialize and Generate Package
         ***********************************************/
-        public bool GeneratePackage ()
+        private bool _InitialPackagesRemain()
+        {
+            mPackagesRemain.Clear();
+
+            if (mGameStage == GameStage.FIRST_HALF)
+            {
+                for (int i = 0;i < mPackageFirstHalf.Amount;i++)
+                {
+                    mPackagesRemain.Add(mPackageFirstHalf.Index(i));
+                }
+                return true;
+            }
+            else if (mGameStage == GameStage.SENCOND_HALF)
+            {
+                for (int i = 0;i < mPackageSecondHalf.Amount;i++)
+                {
+                    mPackagesRemain.Add(mPackageSecondHalf.Index(i));
+                }
+                return true;
+            }
+            else 
+            {
+                return false;
+            }
+        }
+
+        private bool _GeneratePackage ()
         {
             if (mGameStage == GameStage.FIRST_HALF && 
-                mGameTime >= mPackagesFirst.NextGenerationTime)
+                mGameTime >= mPackageFirstHalf.NextGenerationTime)
             {
-                mPackagesRemain.Add(mPackagesFirst.GeneratePackage);
+                mPackagesRemain.Add(mPackageFirstHalf.GeneratePackage());
                 return true;
             }
             else if (mGameStage == GameStage.SENCOND_HALF &&
-                mGameTime >= mPackagesSecond.NextGenerationTime)
+                mGameTime >= mPackageSecondHalf.NextGenerationTime)
             {
-                mPackagesRemain.Add(mPackagesSecond.GeneratePackage);
+                mPackagesRemain.Add(mPackageSecondHalf.GeneratePackage());
                 return true;
             }
             else
@@ -200,51 +252,24 @@ namespace EDCHOST24
         /***********************************************
         Pick and Delivery Package
         ***********************************************/
-        public void PickPackage()
+        private void _PickPackage(ref Car _car)
         {
-            if (mCamp == Camp.A)
+            foreach(Package pkg in mPackagesRemain)
             {
-                foreach(Package pkg in mPackagesRemain)
+                if (pkg.GetDeparture(_car.mPos) <= COLLISION_RADIUS)
                 {
-                    if (pkg.GetDeparture(mCar_1.mPos) <= COLLISION_RADIUS)
-                    {
-                        mCar_1.PickPackage(pkg);
-                    }
-                }
-            } 
-            else if (mCamp == Camp.B)
-            {
-                foreach(Package pkg in mPackagesRemain)
-                {
-                    if (pkg.GetDeparture(mCar_2.mPos) <= COLLISION_RADIUS)
-                    {
-                        mCar_2.PickPackage(pkg);
-                    }
+                    _car.PickPackage(pkg, mGameTime);
                 }
             }
         }
 
-        public void DeliveryPackage()
+        private void _DeliveryPackage(ref Car _car)
         {
-            if (mCamp == Camp.A)
+            foreach(Package pkg in _car.mPickedPackages)
             {
-                foreach(Package pkg in mCar_1.mPickedPackages)
+                if (pkg.GetDestination(_car.mPos) <= COLLISION_RADIUS)
                 {
-                    if (pkg.GetDestination(mCar_1.mPos) <= COLLISION_RADIUS)
-                    {
-                        mCar_1.DropPackage(pkg);
-                    }
-                }
-
-            } 
-            else if (mCamp == Camp.B)
-            {
-                foreach(Package pkg in mCar_2.mPickedPackages)
-                {
-                    if (pkg.GetDeparture(mCar_2.mPos) <= COLLISION_RADIUS)
-                    {
-                        mCar_2.DropPackage(pkg);
-                    }
+                    _car.DropPackage(pkg);
                 }
             }
         }
@@ -283,11 +308,11 @@ namespace EDCHOST24
         {
             if (mCamp == Camp.A)
             {
-                _Penalty(mCar_1);
+                _Penalty(mCarA);
             }
             else if (mCamp == Camp.B)
             {
-                _Penalty(mCar_2);
+                _Penalty (mCarB);
             }
         }
 
@@ -296,19 +321,21 @@ namespace EDCHOST24
         ***********************************************/
         private bool _InitialPackagesRemain()
         {
+            mPackagesRemain.Clear();
+
             if (mGameStage == GameStage.FIRST_HALF)
             {
-                for (int i = 0;i < mPackagesFirst.Amount;i++)
+                for (int i = 0;i < mPackageFirstHalf.Amount;i++)
                 {
-                    mPackagesRemain.Add(mPackagesFirst.Index(i));
+                    mPackagesRemain.Add(mPackageFirstHalf.Index(i));
                 }
                 return true;
             }
             else if (mGameStage == GameStage.SENCOND_HALF)
             {
-                for (int i = 0;i < mPackagesSecond.Amount;i++)
+                for (int i = 0;i < mPackageSecondHalf.Amount;i++)
                 {
-                    mPackagesRemain.Add(mPackagesSecond.Index(i));
+                    mPackagesRemain.Add(mPackageSecondHalf.Index(i));
                 }
                 return true;
             }
@@ -372,11 +399,11 @@ namespace EDCHOST24
             {
                 if (_car.MyCamp == Camp.A)
                 {
-                    mChargeStation_1.Add(mCar_1.GetCarPos(0));
+                    mChargeStationA.Add(mCarA.GetCarPos(0));
                 }
                 else if (_car.MyCamp == Camp.B)
                 {
-                    mChargeStation_2.Add(mCar_2.GetCarPos(0));
+                    mChargeStationB.Add (mCarB.GetCarPos(0));
                 }
             }
         }

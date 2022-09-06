@@ -11,8 +11,21 @@ namespace EDCHOST24
     {
         NONE = 0, A, B
     };
+
     public class Car //选手的车
     {
+        private class PackagesAndTime
+        {
+            public Package mPkg;
+            public int mFirstCollisionTime;
+
+            public PackageAndPickedTime(Package _pkg, int _FirstCollisionTime = -1)
+            {
+                mPkg = _pkg;
+                mFirstCollisionTime = _FirstCollisionTime;
+            }
+        }
+
         public const int RUN_CREDIT = 10;          //小车启动可以得到10分;
         public const int PICK_CREDIT = 5;          //接到一笔订单得5分;
         public const int ARRIVE_EASY_CREDIT = 20;  //规定时间内送达外卖可以得到20/25/30分;
@@ -29,11 +42,6 @@ namespace EDCHOST24
 
         public Queue<Dot> mQueuePos;
 
-
-        public Dot mPos;
-        public Dot mLastPos;
-        public Dot mLastOneSecondPos;
-        public Dot mTransPos;
         public Camp MyCamp;               //A or B get、set直接两个封装好的函数
         public int MyScore;               //得分
         
@@ -51,20 +59,13 @@ namespace EDCHOST24
         public int mIsInOpponentChargeStation;
         public int mIsInObstacle;          
         public int mFoulCount;            //小车获得惩罚的个数
-        
-        /*Game里如果用不到就删
-        public int mRightPos;             //小车现在的位置信息是否是正确的，0为不正确的，1为正确的
-        public int mRightPosCount;        //用于记录小车位置是否该正确了
-        */
-        public List<Package> mPickedPackages;
+        public int mMileage;              //小车续航里程
+        public List<PackagesAndTime> mPickedPackages;
 
-        public Car(Camp c, int task)
+        public Car(Camp c)
         {
             MyCamp = c;
-            mPos = new Dot(0, 0);
-            mLastPos = new Dot(0, 0);
-            mLastOneSecondPos = new Dot(0, 0);
-            mTransPos = new Dot(0, 0);
+            mQueuePos = new Queue<Dot>{(0, 0), (0, 0), (0, 0)};
             MyScore = 0;
             mIsAbleToRun = 0;
             mPickCount = 0;
@@ -77,9 +78,8 @@ namespace EDCHOST24
             mIsInField = 0;
             mIsInCharge = 0;
             mFoulCount = 0;
-            mPickedPackages = new List<Package>();
-            //mRightPos = 1;
-            //mRightPosCount = 0;
+            mPickedPackages = new List<PackagesAndPickedTime>();
+            mMileage = 200;
         }
 
         public void Update()
@@ -131,7 +131,7 @@ namespace EDCHOST24
             if (mPkgCount < MAX_PKG_COUNT)
             {
                 NewPackage.PickPackage();
-                mPickedPackages.Add(NewPackage);
+                mPickedPackages.Add(new PackagesAndTime (NewPackage));
                 mPkgCount++;
                 mPickCount++;
                 UpdateScore();
@@ -155,7 +155,7 @@ namespace EDCHOST24
         }
 
         // ExtraDistanceOnEachRefresh is in cm
-        public void IsOutOfPower (int _ExtraDistanceOnEachRefresh)
+        public int IsOutOfPower (int _ExtraDistanceOnEachRefresh)
         {
 
         }

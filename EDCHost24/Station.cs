@@ -41,18 +41,18 @@ namespace EDCHOST24
 
         public Dot Index(int i)
         {
-            if (i <mStationList.Count())
+            if (i < mStationList.Count())
             {
                 return mStationList[i];
             }
 
-            Dot temp = new Dot (-1, -1);
-            return  temp;
+            
+            return new Dot(-1, -1);
         }
 
         private bool _isNewStationLegal(Dot _inPos)
         {
-
+            
         }
     }
 

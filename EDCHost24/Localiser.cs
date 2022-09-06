@@ -26,19 +26,6 @@ namespace EDCHOST22
             centres2 = new List<Point2i>();
         }
 
-        public List<Point2i> GetCentres(Camp cmp)
-        {
-            List<Point2i> centres;
-            switch (cmp)
-            {
-                case Camp.A: centres = new List<Point2i>(centres1); break;
-                case Camp.B: centres = new List<Point2i>(centres2); break;
-                default: centres = new List<Point2i>(); break;
-            }
-            return centres;
-        }
-
-
         // 根据计算得到的中心点集，返回定位到的小车 showMap 坐标
         // 若在相机拍摄的图中没有发现某小车，则该车的坐标返回(-1, -1)
         public void GetCarLocations(out Point2i pt1, out Point2i pt2)
@@ -56,8 +43,20 @@ namespace EDCHOST22
             else pt2 = new Point2i(-1, -1);
         }
 
+        private List<Point2i> GetCentres(Camp cmp)
+        {
+            List<Point2i> centres;
+            switch (cmp)
+            {
+                case Camp.A: centres = new List<Point2i>(centres1); break;
+                case Camp.B: centres = new List<Point2i>(centres2); break;
+                default: centres = new List<Point2i>(); break;
+            }
+            return centres;
+        }
+
         // 定位核心代码
-        public void Locate(Mat mat, MyFlags localiseFlags)
+        private void Locate(Mat mat, MyFlags localiseFlags)
         {
             // 如果没有传入摄像机拍摄的画面，则返回
             if (mat == null || mat.Empty()) return;
