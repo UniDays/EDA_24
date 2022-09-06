@@ -13,6 +13,7 @@ namespace EDCHOST24
         NONE = 0, A, B
     };
 
+
     // STL: Store a series of position of car
     public class MyQueue <T>
     {
@@ -64,6 +65,11 @@ namespace EDCHOST24
         {
             return mItem.Count;
         }
+
+        public int Clear()
+        {
+            mItem.Clear();
+        }
     }
 
 
@@ -88,12 +94,7 @@ namespace EDCHOST24
 
         public const int RUN_CREDIT = 10;          //小车启动可以得到10分;
         public const int PICK_CREDIT = 5;          //接到一笔订单得5分;
-        public const int ARRIVE_EASY_CREDIT = 20;  //规定时间内送达外卖可以得到20/25/30分;
-        public const int ARRIVE_NORMAL_CREDIT = 25;
-        public const int ARRIVE_HARD_CREDIT = 30;
         public const int CHARGE_CREDIT = 5;        // credit for set a charge station
-        public const int LATE_PENALTY = 5;         //外卖超时1秒惩罚5分;
-        public const int IGNORE_PENALTY = 5;       //未接单惩罚5分;
         public const int ON_BLACk_LINE_PENALTY = 10;    
         public const int IN_OPPONENT_STATION_PENALTY = 10; // in cm per frame
         public const int IN_OBSTACLE_PENALTY = 10; // in cm per frame
@@ -108,28 +109,27 @@ namespace EDCHOST24
         public const int MAX_MILEAGE = 2000; // in cm
 
 
-        public MyQueue<Dot> mQueuePos;
-
-        public MyQueue<int> mFlagIsInChargeStation;
-
-        public Camp MyCamp;               //A or B get、set直接两个封装好的函数
-        public int mScore;               //得分
-        
+        private MyQueue<Dot> mQueuePos;   // series of location
+        public Camp mCamp;               //A or B get、set直接两个封装好的函数
+        private int mScore;               //得分
         private int mMileage;              //小车续航里程
+        private List<PackagesAndTime> mPickedPackages; // package picked by car
+
+        //Flag of whether the car is able to run
+        private int mIsAbleToRun;
+
 
         // Flags of Location
-
         // Locations where car would get penalty
         private int mIsOnBlackLine;   
         private int mIsInOpponentChargeStation;
         private int mIsInObstacle;       
         
-        private int mIsInChargeStation;           //小车目前是否在充电区域内 0不在充电区内 1在充电区内
+        
+        public MyQueue<int> mFlagIsInChargeStation;
+
 
         private int mGameTime;
-
-
-        public List<PackagesAndTime> mPickedPackages;
 
 
         /********************************************
@@ -137,17 +137,63 @@ namespace EDCHOST24
         *********************************************/
         public Car(Camp c)
         {
+            mQueuePos = new MyQueue<Dot>(10);
+            mCamp = c;
+            mScore = 0;
+            mMileage = MAX_MILEAGE;
+            mPickedPackages = new List<PackagesAndTime>();
             
+            // Flags
+            mIsAbleToRun = 0;
+            mIsOnBlackLine = 0;
+            mIsInOpponentChargeStation = 0;
+            mIsInObstacle = 0;
+            mFlagIsInChargeStation = new MyQueue<int>(10);
+
+            mGameTime = -1;
         }
 
+        public void Reset()
+        {
+            mQueuePos.Clear();
+
+            mScore = 0;
+            mMileage = MAX_MILEAGE;
+            mPickedPackages.Clear();
+
+            // Flags
+            mIsAbleToRun = 0;
+            mIsOnBlackLine = 0;
+            mIsInOpponentChargeStation = 0;
+            mIsInObstacle = 0;
+            mFlagIsInChargeStation.Clear();
+
+            mGameTime = -1;
+        }
 
         public int Update(Dot _CarPos, int _GameTime, int _IsOnBlackLine, 
             int _IsInObstacle, int _IsInOpponentStation, int _IsInChargeStation, 
-            ref List<Package> _PackagesRemain)
+            ref List<Package> _PackagesRemain, out int _TimePenalty)
         {
             mGameTime = _GameTime;
 
             UpdatePos(_CarPos);
+
+            if (!mIsAbleToRun) 
+            {
+                AbleToRun();
+            }
+
+            //action
+            PickPackage(_CarPos, _PackagesRemain);
+            DropPackage(_CarPos);
+            UpdateMileage(_TimePenalty);
+            Charge(_IsInChargeStation);
+
+            // Penalty
+            OnBlackLinePenaly(_IsOnBlackLine);
+            InOpponentStationPenalty(_IsInOpponentStation);
+            InObstaclePenalty(_IsInObstacle);
         }
 
         public int GetScore ()
@@ -155,9 +201,39 @@ namespace EDCHOST24
             return mScore;
         }
 
+        public void GetMark()
+        {
+            mScore -= MARK_PENALTY;
+        }
+
+        public void SetChargeStation ()
+        {
+            mScore += CHARGE_CREDIT;
+        }
+
+        public Dot CurrentPos()
+        {
+            return mQueuePos[-1];
+        }
+
         /********************************************
         Private Functions
         *********************************************/
+
+        private void UpdatePos (Dot _CarPos)
+        {
+            mQueuePos.Enqueue(_CarPos);
+        }
+
+        private void AbleToRun()
+        {
+            if (!mIsAbleToRun && mQueuePos.Count() > 1 && 
+            Dot.Distance(mQueuePos[-1], mQueuePos[-2]) > 0)
+            {
+                mScore += RUN_CREDIT;
+                mIsAbleToRun = 1;
+            }
+        }
 
         private void PickPackage(Dot _CarPos, ref List<Package> _PackagesRemain)      //拾取外卖
         {
@@ -197,11 +273,6 @@ namespace EDCHOST24
             }
         }
 
-        private void UpdatePos (Dot _CarPos)
-        {
-            mQueuePos.Enqueue(_CarPos);
-        }
-
         private void UpdateMileage (out int _Time_Penalty)
         {
             int DeltaDistance = Dot.Distance(PosQueue[0], PosQueue[-1]);
@@ -226,14 +297,6 @@ namespace EDCHOST24
             mMileage = MAX_MILEAGE;
         }
 
-        private void SetChargeStation (int HasSetStation)
-        {
-            if (HasSetStation)
-            {
-                mScore += CHARGE_CREDIT;
-            }
-        }
-
         private void OnBlackLinePenaly (int IsOnBlackLine)
         {
             if (IsOnBlackLine && !mIsOnBlackLine)
@@ -255,17 +318,12 @@ namespace EDCHOST24
             }
         }
 
-        private void InObstacle (in IsInObstacle)
+        private void InObstaclePenalty (int IsInObstacle)
         {
             if (mIsInObstacle)
             {
                 mMileage -= IN_OBSTACLE_PENALTY;
             }
-        }
-
-        private void GetMark(int HasGetMark)
-        {
-            mScore -= MARK_PENALTY;
         }
     }
 }

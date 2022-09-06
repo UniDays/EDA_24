@@ -12,6 +12,7 @@ using System.Diagnostics;
 using Point2i = OpenCvSharp.Point;
 using Cvt = EDCHOST22.MyConvert;
 using System.Runtime.InteropServices;
+using EDCHOST24.Game;
 
 namespace EDCHOST22
 {
@@ -178,9 +179,6 @@ namespace EDCHOST22
         // 进行界面刷新、读取摄像头图像、与游戏逻辑交互的周期性函数
         private void Flush()
         {
-            // 从 labyrinth 目录下读取所有障碍物文件
-            game.mLabyrinth.GetLabyName();
-
             // 如果还未进行参数设置，则创建并打开SetWindow窗口，进行参数设置
             if (!alreadySet)
             {
@@ -192,32 +190,18 @@ namespace EDCHOST22
             // 从视频帧中读取一帧，进行图像处理、绘图和数值更新
             VideoProcess();
 
-            // 保存上一帧的小车位置，以便判断是否逆行
-            game.CarA.UpdateLastPos();
-            game.CarB.UpdateLastPos();
-
-            // 游戏逻辑端接收图像处理端信息
-            game.CarA.SetPos(Cvt.Point2Dot(logicCarA));
-            game.CarB.SetPos(Cvt.Point2Dot(logicCarB));  
+            Dot CarPosA =  Cvt.Point2Dot(logicCarA);
+            Dot CarPosB = Cvt.Point2Dot(logicCarB);
 
             // 更新比赛信息
-            game.Update();
-
-            // 图像处理端接收游戏逻辑端信息
-            logicPsgStart = Cvt.Dot2Point(game.curPsg.Start_Dot);
-            logicPsgEnd = Cvt.Dot2Point(game.curPsg.End_Dot);
-            logicPkgs[0] = Cvt.Dot2Point(game.currentPkgList[0].mPos);
-            logicPkgs[1] = Cvt.Dot2Point(game.currentPkgList[1].mPos);
-            logicPkgs[2] = Cvt.Dot2Point(game.currentPkgList[2].mPos);
-            logicPkgs[3] = Cvt.Dot2Point(game.currentPkgList[3].mPos);
-            logicPkgs[4] = Cvt.Dot2Point(game.currentPkgList[4].mPos);
-            logicPkgs[5] = Cvt.Dot2Point(game.currentPkgList[5].mPos);
-            PkgsWhetherPicked[0] = game.currentPkgList[0].IsPicked;
-            PkgsWhetherPicked[1] = game.currentPkgList[1].IsPicked;
-            PkgsWhetherPicked[2] = game.currentPkgList[2].IsPicked;
-            PkgsWhetherPicked[3] = game.currentPkgList[3].IsPicked;
-            PkgsWhetherPicked[4] = game.currentPkgList[4].IsPicked;
-            PkgsWhetherPicked[5] = game.currentPkgList[5].IsPicked;
+            if (game.GetCamp == Camp.A)
+            {
+                game.UpdateOnEachFrame(CarPosA, _HasMark, _SetChargeStation);
+            }
+            else if (game.GetCamp == Camp.B)
+            {
+                game.UpdateOnEachFrame(CarPosB, _HasMark, _SetChargeStation);
+            }
         }
 
         // 当Tracker被加载时调用此函数
@@ -248,29 +232,20 @@ namespace EDCHOST22
 
 
         #region 向小车传送信息
-        // 给小车A发送信息
-        private void SendCarAMessage()
+        private void SendMessage()
         {
             // 打包好要发给A车的信息
-            byte[] Message = game.PackCarAMessage();
+            byte[] Message = game.Message();
 
             // 通过串口1发送给A车
-            if (serial1 != null && serial1.IsOpen)
-                serial1.Write(Message, 0, 70);
-            ShowMessage(Message);
-            validPorts = SerialPort.GetPortNames();
-        }
-
-        // 给小车B发送信息
-        private void SendCarBMessage()
-        {
-            // 打包好要发给B车的信息
-            byte[] Message = game.PackCarBMessage();
-
-            // 通过串口2发送给B车
-            if (serial2 != null && serial2.IsOpen)
-                serial2.Write(Message, 0, 70);
-
+            if (game.GetCamp == Camp.A && serial1 != null && serial1.IsOpen)
+            {
+                serial1.Write(Message, 0, 100);
+            }
+            else if (game.GetCamp == Camp.B && serial2 != null && serial2.IsOpen)
+            {
+                serial2.Write(Message, 0, 100);
+            }
             ShowMessage(Message);
             validPorts = SerialPort.GetPortNames();
         }
@@ -612,43 +587,7 @@ namespace EDCHOST22
         // 参数 M 接收的是发送给小车的编码过的信息，但并未使用，猜测可能仅于调试时使用
         private void ShowMessage(byte[] M)
         {
-            //label_CountDown.Text = $"{(game.MaxRound - game.Round) / 600}:{((game.MaxRound - game.Round) / 10) % 60 / 10}{((game.MaxRound - game.Round) / 10) % 60 % 10}";
 
-            // A,B车的总分数
-            labelAScore.Text = $"{game.CarA.MyScore}";
-            labelBScore.Text = $"{game.CarB.MyScore}";
-
-            // 上半场或下半场
-            label_GameCount.Text = (game.gameStage == GameStage.FIRST_1 || game.gameStage == GameStage.FIRST_2) ? "上半场" : "下半场";
-
-            // 阶段一或阶段二
-            label_GameStage.Text = (game.gameStage == GameStage.FIRST_1 || game.gameStage == GameStage.LATTER_1) ? "阶段一" : "阶段二";
-
-            // A,B车犯规的次数
-            label_AFoulNum.Text = $"{game.CarA.mFoulCount}";
-            label_BFoulNum.Text = $"{game.CarB.mFoulCount}";
-
-            // A,B车的得分明细
-            label_AMessage.Text =
-                $"转移被困人员数　　{game.CarA.mRescueCount}\n" +
-                $"获得防汛物资数　　{game.CarA.mPkgCount}\n";
-            label_BMessage.Text =
-                $"{game.CarB.mRescueCount}　　转移被困人员数\n" +
-                $"{game.CarB.mPkgCount}　　获得防汛物资数\n";
-
-            // A,B车的坐标信息
-            label_Debug.Text =
-                $"A车坐标： ({game.CarA.mPos.x}, {game.CarA.mPos.y})\n" +
-                $"B车坐标： ({game.CarB.mPos.x}, {game.CarB.mPos.y})";
-
-            //比赛时间信息
-            time.Text = $"比赛时间： ({game.mGameTime/1000})\n";
-
-            AWall.Text = $"A撞到虚拟障碍物数　　{game.CarA.mCrossWallCount}\n";
-            BWall.Text = $"B撞到虚拟障碍物数　　{game.CarB.mCrossWallCount}\n";
-
-            AFlood.Text = $"A撞到隔离区数　　{game.CarA.mCrossFloodCount}\n";
-            BFlood.Text = $"B撞到隔离区数　　{game.CarB.mCrossFloodCount}\n";
 
         }
 
@@ -734,11 +673,6 @@ namespace EDCHOST22
         private void buttonStart_Click(object sender, EventArgs e)
         {
             game.Start();
-            buttonPause.Enabled = true;
-            if(game.gameStage==GameStage.LATTER_1||game.gameStage==GameStage.FIRST_1)
-            {
-                game.mFlood.num = 0;
-            }
         }
 
         // 比赛暂停（待完善）
@@ -810,32 +744,13 @@ namespace EDCHOST22
         // A车记1次犯规
         private void button_AFoul_Click(object sender, EventArgs e)
         {
-            game.CarA.AddFoulCount();
-
-            if (game.FoulTimeFS != null)
-            {
-                byte[] data = Encoding.Default.GetBytes($"A -50 @game time {game.mGameTime/1000} s\r\n");
-                game.FoulTimeFS.Write(data, 0, data.Length);
-                // 如果不加以下两行的话，数据无法写到文件中
-                game.FoulTimeFS.Flush();
-                //game.FoulTimeFS.Close();
-            }
+            game.GetMark();
         }
 
         // B车记1次犯规
         private void button_BFoul_Click(object sender, EventArgs e)
         {
-            game.CarB.AddFoulCount();
-
-            if (game.FoulTimeFS != null)
-            {
-                byte[] data = Encoding.Default.GetBytes($"B -50 @game time {game.mGameTime/1000} s\r\n");
-                game.FoulTimeFS.Write(data, 0, data.Length);
-                // 如果不加以下两行的话，数据无法写到文件中
-                game.FoulTimeFS.Flush();
-                
-                //game.FoulTimeFS.Close();
-            }
+            game.GetMark();
         }
 
 
@@ -848,9 +763,7 @@ namespace EDCHOST22
         {
             Flush();
             // 如果A车在场地内且在迷宫外
-            SendCarAMessage();
-            // 如果B车在场地内且在迷宫外
-            SendCarBMessage();
+            SendMessage();
             //更新界面
             SetWindowSize();
         }

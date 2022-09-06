@@ -13,6 +13,7 @@ namespace EDCHOST24
         public const int ARRIVE_EASY_CREDIT = 20;   // scores for different levels of packages
         public const int ARRIVE_NORMAL_CREDIT = 25;
         public const int ARRIVE_HARD_CREDIT = 30;
+        public const int LATE_PENALTY = 5;         // 5 per sceond
 
         private Dot mDeparture;     // Departure of Package
         private Dot mDestination;   // Destination of Package
