@@ -39,6 +39,18 @@ namespace EDCHOST24
             }
         }
 
+        public bool isCollided(Dot _CarPos, int r)
+        {
+            foreach(Dot station in mStationList)
+            {
+                if (Dot.Distance(station, _CarPos) < r)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public Dot Index(int i)
         {
             if (i < mStationList.Count())
@@ -52,7 +64,7 @@ namespace EDCHOST24
 
         private bool _isNewStationLegal(Dot _inPos)
         {
-            
+
         }
     }
 

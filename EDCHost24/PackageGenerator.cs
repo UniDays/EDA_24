@@ -80,15 +80,8 @@ namespace EDCHOST24
 
         public int Amount ()
         {
-            return mPackageList.Count;
+            return mPackageList.Count();
         }
-
-
-        public void PickPackage(int i)
-        {
-            mPackageList[i].PickPackage();
-        }
-
 
         public Package GeneratePackage ()
         {
@@ -100,7 +93,6 @@ namespace EDCHOST24
         {
             return mPackageList[mPointer].GenerationTime();
         }
-
 
         public void ResetPointer()
         {

@@ -23,6 +23,9 @@ namespace EDCHOST24
         public const int AVAILIABLE_MIN_X = 0;
         public const int AVAILIABLE_MAX_Y = 254;
         public const int AVAILIABLE_MIN_Y = 0;
+        public const int EDGE_DISTANCE = 28;
+        public const int ENTRANCE_WIDTH = 36;
+        public const int LINE_WIDTH = 2;
 
         // size of car
         public const int COLLISION_RADIUS = 8;
@@ -44,6 +47,7 @@ namespace EDCHOST24
         // Set time zero as the start time of each race
         private int mStartTime; // system time, update for each race
         private int mGameTime;
+        private int mTimeRemain;
 
         // car and package
         private Car mCarA, mCarB;
@@ -65,6 +69,8 @@ namespace EDCHOST24
 
         // obstacle
         private Labyrinth mObstacle;
+
+        private Boundary mBoundary;
 
         
         /***********************************************
@@ -99,8 +105,10 @@ namespace EDCHOST24
 
             mStartTime = -1;
             mGameTime = -1;
+            mTimeRemain = 0;
 
-            mObstacle = new Obstacle();
+            mObstacle = new Labyrinth();
+            mBoundary = new Boundary(MAX_SIZE, EDGE_DISTANCE, ENTRANCE_WIDTH, LINE_WIDTH);
         }
 
 
@@ -114,14 +122,19 @@ namespace EDCHOST24
             // Try to generate packages on each refresh
             _GeneratePackage();
 
+            int TimePenalty = 0;
             // Team A is on racing
             if (mCamp == Camp.A)
             {
-                
+                TimePenalty = mCarA.Update(_CarPos, mGameTime, _IsOnBlackLine(_CarPos), 
+                _IsInObstacle(_CarPos), _IsInOpponentStation(_CarPos), 
+                _IsInChargeStation(_CarPos), mPackagesRemain);
             }
             else if (mCamp == Camp.B)
             {
-
+                TimePenalty = mCarA.Update(_CarPos, mGameTime, _IsOnBlackLine(_CarPos), 
+                _IsInObstacle(_CarPos), _IsInOpponentStation(_CarPos), 
+                _IsInChargeStation(_CarPos), mPackagesRemain);
             }  
         }
 
@@ -156,6 +169,11 @@ namespace EDCHOST24
             // initial packages on the field
             _InitialPackagesRemain();
 
+            if (mGameStage = GameStage.FIRST_HALF)
+            {
+                
+            }
+
             mStartTime = _GetCurrentTime();
             mGameTime = 0;
         }
@@ -172,9 +190,10 @@ namespace EDCHOST24
             {
                 mScoreA[(int)mGameStage - 1] = mCarA.GetScore();
                 mCarA.Reset();
-            } else if (mCamp == Camp.B)
+            } 
+            else if (mCamp == Camp.B)
             {
-                mScoreA[(int)mGameStage - 1] = mCarA.GetScore();
+                mScoreB[(int)mGameStage - 1] = mCarB.GetScore();
                 mCarB.Reset();
             }
 
@@ -192,7 +211,7 @@ namespace EDCHOST24
 
 
 
-         /***********************************************************************
+        /***********************************************************************
         Private Functions
         ***********************************************************************/
 
@@ -250,38 +269,6 @@ namespace EDCHOST24
 
 
         /***********************************************
-        Pick and Delivery Package
-        ***********************************************/
-        private void _PickPackage(ref Car _car)
-        {
-            foreach(Package pkg in mPackagesRemain)
-            {
-                if (pkg.GetDeparture(_car.mPos) <= COLLISION_RADIUS)
-                {
-                    _car.PickPackage(pkg, mGameTime);
-                }
-            }
-        }
-
-        private void _DeliveryPackage(ref Car _car)
-        {
-            foreach(Package pkg in _car.mPickedPackages)
-            {
-                if (pkg.GetDestination(_car.mPos) <= COLLISION_RADIUS)
-                {
-                    _car.DropPackage(pkg);
-                }
-            }
-        }
-
-
-        
-        /***********************************************************************
-        Private Functions
-        ***********************************************************************/
-
-
-        /***********************************************
         Time
         ***********************************************/
         private void _UpdateGameTime ()
@@ -298,52 +285,6 @@ namespace EDCHOST24
             return time;
         }
 
-
-
-        /***********************************************
-        Get Penalty for accessing illegal area
-        i.e Out of Competition Area, in Obstacle Area, in Opponent's Charge Station
-        ***********************************************/
-        public void GetPenalty()
-        {
-            if (mCamp == Camp.A)
-            {
-                _Penalty(mCarA);
-            }
-            else if (mCamp == Camp.B)
-            {
-                _Penalty (mCarB);
-            }
-        }
-
-        /***********************************************
-        Initialize Packages Remain
-        ***********************************************/
-        private bool _InitialPackagesRemain()
-        {
-            mPackagesRemain.Clear();
-
-            if (mGameStage == GameStage.FIRST_HALF)
-            {
-                for (int i = 0;i < mPackageFirstHalf.Amount;i++)
-                {
-                    mPackagesRemain.Add(mPackageFirstHalf.Index(i));
-                }
-                return true;
-            }
-            else if (mGameStage == GameStage.SENCOND_HALF)
-            {
-                for (int i = 0;i < mPackageSecondHalf.Amount;i++)
-                {
-                    mPackagesRemain.Add(mPackageSecondHalf.Index(i));
-                }
-                return true;
-            }
-            else 
-            {
-                return false;
-            }
-        }
 
         /***********************************************
         Penalty for Access illegal Area
@@ -370,19 +311,46 @@ namespace EDCHOST24
             }
         }
 
-        private bool _IsOutOfCompetitionArea(Car _car)
+        private bool _IsOnBlackLine(Dot _CarPos)
         {
-            
+            return mBoundary.isCollided(_CarPos, COLLISION_RADIUS);
         }
 
-        private bool _IsInObstacle (Car _car)
+        private bool _IsInObstacle (Dot _CarPos)
         {
-            
+            return mObstacle.isCollided(_CarPos, COLLISION_RADIUS);
         }
 
-        private bool _IsInOpponentStation (Car _car)
+        private bool _IsInOpponentStation (Dot _CarPos)
         {
-            
+            if (mCamp == Camp.A)
+            {
+                return mChargeStationB.isCollided(_CarPos, COLLISION_RADIUS);
+            } 
+            else if (mCamp == Camp.B)
+            {
+                return mChargeStationA.isCollided(_CarPos, COLLISION_RADIUS);
+            }
+            else
+            {
+                throw new Exception("No team is racing now");
+            }
+        }
+
+        private bool _IsInChargeStation(Dot _CarPos)
+        {
+            if (mCamp == Camp.A)
+            {
+                return mChargeStationA.isCollided(_CarPos, COLLISION_RADIUS);
+            } 
+            else if (mCamp == Camp.B)
+            {
+                return mChargeStationB.isCollided(_CarPos, COLLISION_RADIUS);
+            }
+            else
+            {
+                throw new Exception("No team is racing now");
+            }
         }
 
         /***********************************************
