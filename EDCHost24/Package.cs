@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using EDCHOST24.Dot;
+using Dot = EDCHOST24.Dot;
 
 namespace EDCHOST24
 {

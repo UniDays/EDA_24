@@ -12,7 +12,7 @@ using System.Diagnostics;
 using Point2i = OpenCvSharp.Point;
 using Cvt = EDCHOST22.MyConvert;
 using System.Runtime.InteropServices;
-using EDCHOST24.Game;
+using Game = EDCHOST24.Game;
 
 namespace EDCHOST22
 {

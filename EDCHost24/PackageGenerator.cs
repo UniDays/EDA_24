@@ -48,7 +48,7 @@ namespace EDCHOST24
                     continue;
                 }
 
-                mPackageList.Add(Departure, Destination, 0);
+                mPackageList.Add(new Package (Departure, Destination, 0) );
             }
 
 

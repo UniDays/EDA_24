@@ -250,11 +250,11 @@ namespace EDCHOST24
             byte[] MyMessage = new byte[100];
             if (mCamp == Camp.A)
             {
-
+                
             }
             else if (mCamp == Camp.B)
             {
-
+                
             }
             return MyMessage;
         }
