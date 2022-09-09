@@ -145,27 +145,27 @@ namespace EDCHOST24
             }  
         }
 
-        public void SetChargeStation(Camp c)
+        public void SetChargeStation()
         {
-            if (c == Camp.A)
+            if (mCamp == Camp.A)
             {
                 mCarA.SetChargeStation();
                 mChargeStationA.Add(mCarA.CurrentPos());
             }
-            else if (c == Camp.B)
+            else if (mCamp == Camp.B)
             {
                 mCarB.SetChargeStation();
                 mChargeStationB.Add(mCarB.CurrentPos());
             }
         }
 
-        public void GetMark(Camp c)
+        public void GetMark()
         {
-            if (c == Camp.A)
+            if (mCamp == Camp.A)
             {
                 mCarA.GetMark();
             }
-            else if (c == Camp.B)
+            else if (mCamp == Camp.B)
             {
                  mCarB.GetMark();
             }
@@ -215,6 +215,16 @@ namespace EDCHOST24
             mGameTime = 0;
         }
 
+        public void Pause()
+        {
+            
+        }
+
+        public void Continue()
+        {
+
+        }
+
         public void End ()
         {
             if (mGameState != GameState.RUN)
@@ -259,10 +269,7 @@ namespace EDCHOST24
             return MyMessage;
         }
 
-        public Camp GetCamp()
-        {
-            return mCamp;
-        }
+
 
 
 
@@ -331,15 +338,14 @@ namespace EDCHOST24
         private static int _GetCurrentTime()
         {
             System.DateTime currentTime = System.DateTime.Now;
+            // time is in millisecond
             int time = currentTime.Hour * 3600000 + currentTime.Minute * 60000 + currentTime.Second * 1000;
-            //Debug.WriteLine("H, M, S: {0}, {1}, {2}", currentTime.Hour, currentTime.Minute, currentTime.Second);
-            //Debug.WriteLine("GetCurrentTime，Time = {0}", time); 
             return time;
         }
 
 
         /***********************************************
-        Judge Collision
+        Judge Collision of illegal locations
         ***********************************************/
         private bool _IsOnBlackLine(Dot _CarPos)
         {
