@@ -216,6 +216,9 @@ namespace EDCHOST24
             return mQueuePos[-1];
         }
 
+
+
+
         /********************************************
         Private Functions
         *********************************************/
@@ -280,6 +283,10 @@ namespace EDCHOST24
             if (mMileage < 0)
             {
                 _Time_Penalty = DeltaDistance * ENERGY_EXHAUSTION_PENALTY;
+            }
+            else
+            {
+                _Time_Penalty = 0;
             }
         }
 

@@ -7,13 +7,17 @@ using System.IO;
 using System.Drawing;
 using System.Security.Cryptography;
 using System.Diagnostics;
+using Dot = EDCHOST24.Dot;
+using Car = EDCHOST24.Car;
+using PackageList = EDCHOST24.PackageList;
+using Station = EDCHOST24.Station;
 
 namespace EDCHOST24
 {
     // Token
-    public enum GameState { UNSTART = 0, RUN = 1};
+    public enum GameState { UNSTART = 0, RUN = 1, PAUSE = 2, END = 3};
 
-    public enum GameStage { PREPARATION = 0, FIRST_HALF = 1,  SENCOND_HALF= 2, END = 3};
+    public enum GameStage { NONE = 0, FIRST_HALF = 1,  SENCOND_HALF= 2};
 
     public class Game
     {
@@ -82,7 +86,7 @@ namespace EDCHOST24
             Debug.WriteLine("Call Constructor of Game");
 
             mGameState = GameState.UNSTART;
-            mGameStage = GameStage.PREPARATION;
+            mGameStage = GameStage.NONE;
 
             mCamp = Camp.NONE;
 
@@ -117,6 +121,29 @@ namespace EDCHOST24
         ***********************************************/
         public void UpdateOnEachFrame(Dot _CarPos)
         {
+            if (mGameState == GameState.UNSTART)
+            {
+                Debug.WriteLine("Failed to update on frame! The game state is unstart.");
+                return;
+            } 
+            else if (mGameState = GameState.PAUSE)
+            {
+                Debug.WriteLine("Failed to update on frame! The game state is pause.");
+                return;
+            }
+            else if (mGameState == GameState.END)
+            {
+               Debug.WriteLine("Failed to update on frame! The game state is end.");
+               return;
+            }
+
+
+            if (mCamp == Camp.NONE)
+            {
+                Debug.WriteLine("Failed to update on frame! Camp is none which expects to be A or B");
+                return;
+            }
+
             _UpdateGameTime();
 
             // Try to generate packages on each refresh
@@ -124,13 +151,7 @@ namespace EDCHOST24
 
             int TimePenalty = 0;
 
-            // Only allowed to set charge station when the second half is going on
-            if (GameStage != GameStage.SENCOND_HALF)
-            {
-                _SetChargeStation = 0;
-            }
-
-            // Team A is on racing
+            // Update car's info
             if (mCamp == Camp.A)
             {
                 mCarA.Update(_CarPos, mGameTime, _IsOnBlackLine(_CarPos), 
@@ -142,7 +163,17 @@ namespace EDCHOST24
                 mCarB.Update(_CarPos, mGameTime, _IsOnBlackLine(_CarPos), 
                 _IsInObstacle(_CarPos), _IsInOpponentStation(_CarPos), 
                 _IsInChargeStation(_CarPos), mPackagesRemain, TimePenalty);
-            }  
+            }
+
+            //update times remain
+            mTimeRemain = mTimeRemain - mGameTime - TimePenalty;
+
+            //judge wether to end the game automatiacally
+            if (mTimeRemain <= 0)
+            {
+                mGameState = GameState.END;
+                Debug.WriteLine("Time remain is up to 0. The End.");
+            }
         }
 
         public void SetChargeStation()
@@ -217,7 +248,11 @@ namespace EDCHOST24
 
         public void Pause()
         {
-            
+            if (mGameState != GameState.RUN)
+            {
+                Debug.WriteLine("Pause failed! No race is going on.");
+                return;
+            }
         }
 
         public void Continue()
@@ -225,6 +260,7 @@ namespace EDCHOST24
 
         }
 
+        // finish on a manul mode
         public void End ()
         {
             if (mGameState != GameState.RUN)
@@ -246,7 +282,7 @@ namespace EDCHOST24
 
             // set state param of game
             mGameState = GameState.UNSTART;
-            mGameStage = GameStage.PREPARATION;
+            mGameStage = GameStage.NONE;
             mCamp = Camp.NONE;
 
             mPackagesRemain.Clear();
