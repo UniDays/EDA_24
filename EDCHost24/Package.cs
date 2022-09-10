@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Dot = EDCHOST24.Dot;
+//using EDCHOST24.Dot; 不需要
 
 namespace EDCHOST24
 {
@@ -13,7 +13,6 @@ namespace EDCHOST24
         public const int ARRIVE_EASY_CREDIT = 20;   // scores for different levels of packages
         public const int ARRIVE_NORMAL_CREDIT = 25;
         public const int ARRIVE_HARD_CREDIT = 30;
-        public const int LATE_PENALTY = 5;         // 5 per sceond
 
         private Dot mDeparture;     // Departure of Package
         private Dot mDestination;   // Destination of Package
@@ -36,10 +35,10 @@ namespace EDCHOST24
             mScheduledDeliveryTime = 20 * Dot.Distance(mDeparture, mDestination) + 1000;
 
             //judge level
-            if(mDeparture.x >= 40 && mDeparture.x <= 214 && mDeparture.y >= 40 && mDeparture.y <= 214 
+            if (mDeparture.x >= 40 && mDeparture.x <= 214 && mDeparture.y >= 40 && mDeparture.y <= 214
                 && mDestination.x >= 40 && mDestination.x <= 214 && mDestination.y >= 40 && mDestination.y <= 214)
             {
-                if(Distance(mDeparture, mDestination) <= 120)
+                if (Dot.Distance(mDeparture, mDestination) <= 120)
                 {
                     mPackageLevel = 0;
                 }
@@ -53,12 +52,12 @@ namespace EDCHOST24
                 mPackageLevel = 2;
             }
             //judge score
-            switch(mPackageLevel)
-                {
+            switch (mPackageLevel)
+            {
                 case 0: mScheduledScore = ARRIVE_EASY_CREDIT; break;
                 case 1: mScheduledScore = ARRIVE_NORMAL_CREDIT; break;
                 case 2: mScheduledScore = ARRIVE_HARD_CREDIT; break;
-                }
+            }
         }
 
         public Dot Departure()
@@ -71,22 +70,22 @@ namespace EDCHOST24
             return mDestination;
         }
 
-        public int GenerationTime ()
+        public int GenerationTime()
         {
             return mGenerationTime;
         }
 
-        public int ScheduledDeliveryTime ()
+        public int ScheduledDeliveryTime()
         {
             return mScheduledDeliveryTime;
         }
 
-        public int Distance2Departure (Dot _CarPos)
+        public int Distance2Departure(Dot _CarPos)
         {
             return Dot.Distance(_CarPos, mDeparture);
         }
 
-        public int Distance2Destination (Dot _CarPos)
+        public int Distance2Destination(Dot _CarPos)
         {
             return Dot.Distance(_CarPos, mDestination);
         }
@@ -96,6 +95,12 @@ namespace EDCHOST24
             int PackageScore = 0;
 
             return PackageScore;
-        } 
+        }
+
+        public bool IsDotExisted(Dot NewPos)
+        {
+            return (NewPos==mDeparture)||(NewPos==mDestination);
+        }
+
     }
 }
