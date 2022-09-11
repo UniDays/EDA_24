@@ -9,8 +9,11 @@ using System.Security.Cryptography;
 using System.Diagnostics;
 using Dot = EDCHOST24.Dot;
 using Car = EDCHOST24.Car;
+using Package = EDCHOST24.Package;
 using PackageList = EDCHOST24.PackageList;
 using Station = EDCHOST24.Station;
+using Labyrinth = EDCHOST24.Labyrinth;
+using Boundary = EDCHOST24.Boundary;
 
 namespace EDCHOST24
 {
@@ -21,6 +24,7 @@ namespace EDCHOST24
 
     public class Game
     {
+        
         // size of competition area
         public const int MAX_SIZE = 254;
         public const int AVAILIABLE_MAX_X = 254;
