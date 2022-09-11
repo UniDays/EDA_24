@@ -4,14 +4,13 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using Package = EDCHOST24.PackageList;
 
 namespace EDCHOST24
 {
     // STL : Storage the Package
     public class PackageList //存储预备要用的物资信息
     {
-        private List<Package> mPackageList;
+        private static List<Package> mPackageList;
 
         private int X_MAX;
         private int X_MIN;
@@ -34,22 +33,22 @@ namespace EDCHOST24
             LIMITED_TIME = _LIMITED_TIME;
             TIME_INTERVAL = _TIME_INTERVAL;
 
-            mPackageList = new List<Package> ();
+            mPackageList = new List<Package>();
             Random NRand = new Random();
 
             // initialize package at the beginning of game
             for (int i = 0; i < _INITIAL_AMOUNT; i++)
             {
-                Dot Departure = Dot(NRand.Next(X_MIN, X_MAX), NRand.Next(Y_MIN, Y_MAX));
-                Dot Destination = Dot(NRand.Next(X_MIN, X_MAX), NRand.Next(Y_MIN, Y_MAX));
+                Dot Departure = new Dot(NRand.Next(X_MIN, X_MAX), NRand.Next(Y_MIN, Y_MAX));
+                Dot Destination = new Dot(NRand.Next(X_MIN, X_MAX), NRand.Next(Y_MIN, Y_MAX));
 
-                if (!(IsPosLegal(Departure) && IsPosLegal(Destination)))
+                if (!(Dot.IsPosLegal(Departure) && Dot.IsPosLegal(Destination)))
                 {
                     i--;
                     continue;
                 }
 
-                mPackageList.Add(new Package (Departure, Destination, 0) );
+                mPackageList.Add(new Package(Departure, Destination, 0));
             }
 
 
@@ -57,10 +56,10 @@ namespace EDCHOST24
             int LastGenerationTime = 0;
             for (int i = _INITIAL_AMOUNT; LastGenerationTime + TIME_INTERVAL <= LIMITED_TIME; i++)
             {
-                Dot Departure = Dot(NRand.Next(X_MIN, X_MAX), NRand.Next(Y_MIN, Y_MAX));
-                Dot Destination = Dot(NRand.Next(X_MIN, X_MAX), NRand.Next(Y_MIN, Y_MAX));
+                Dot Departure = new Dot(NRand.Next(X_MIN, X_MAX), NRand.Next(Y_MIN, Y_MAX));
+                Dot Destination = new Dot(NRand.Next(X_MIN, X_MAX), NRand.Next(Y_MIN, Y_MAX));
 
-                if (!(IsPosLegal(Departure) && IsPosLegal(Destination)))
+                if (!(Dot.IsPosLegal(Departure) && Dot.IsPosLegal(Destination)))
                 {
                     i--;
                     continue;
@@ -69,28 +68,28 @@ namespace EDCHOST24
                 int GenerationTime = NRand.Next(LastGenerationTime, LastGenerationTime + TIME_INTERVAL);
 
                 LastGenerationTime = GenerationTime;
-                mPackageList.Add(Departure, Destination, GenerationTime);
+                mPackageList.Add(new Package(Departure, Destination, 0));
             }
         }
 
-        
-        public Package Index (int i)
+
+        public Package Index(int i)
         {
             return mPackageList[i];
         }
 
-        public int Amount ()
+        public int Amount()
         {
             return mPackageList.Count();
         }
 
-        public Package GeneratePackage ()
+        public Package GeneratePackage()
         {
             mPointer++;
             return mPackageList[mPointer - 1];
         }
 
-        public int NextGenerationTime ()
+        public int NextGenerationTime()
         {
             return mPackageList[mPointer].GenerationTime();
         }
@@ -100,10 +99,19 @@ namespace EDCHOST24
             mPointer = 0;
         }
 
-        // judge whether the generation point of package is legal
-        private bool IsPosLegal(Dot PackagePos)
+        // 检查所有package，整个检测程序写在Dot里
+        public static bool IsPackageExisted(Dot adot)
         {
-            
+            //check mPackageList
+            foreach(Package element in mPackageList)
+            {
+                if(element.IsDotExisted(adot))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
+
     }
 }
