@@ -406,9 +406,10 @@ namespace EDCHOST22
             //绘制人员起始或终点位置， 并在当前位置和目标位置连线
             //目标点 绿色 正方形  边长16
             //连线 浅绿 线宽 3
-            if (game.gameState == GameState.NORMAL 
-                && (game.gameStage == GameStage.FIRST_2 || game.gameStage == GameStage.LATTER_2))
+            // (?)
+            if (game.mGameState == GameState.RUN)
             {
+                /*
                 // 两种车颜色不一样，要分开绘制
                 if (game.UpperCamp == Camp.A)
                 {
@@ -507,23 +508,25 @@ namespace EDCHOST22
 
                     }
                 }
+                */
 
                 //绘制物资
-                Dot DotA = game.currentPkgList[0].mPos;
-                Dot DotB = game.currentPkgList[1].mPos;
-                Dot DotC = game.currentPkgList[2].mPos;
-                Dot DotD = game.currentPkgList[3].mPos;
-                Dot DotE = game.currentPkgList[4].mPos;
-                Dot DotF = game.currentPkgList[5].mPos;
+                List<Package> packagelist = game.PackagesOnStage();
+                int package_num = packagelist.GetLength();
+                List<Dot> departurelist = new List<Dot>();
+                List<Point2f> logicDots = new List<Point2f>();
 
-                Point2f[] logicDots = { Cvt.Dot2Point(DotA), Cvt.Dot2Point(DotB), Cvt.Dot2Point(DotC), Cvt.Dot2Point(DotD), Cvt.Dot2Point(DotE), Cvt.Dot2Point(DotF) };
-                Point2f[] showDots = coordCvt.LogicToCamera(logicDots);
-                for(int i=0;i<6;i++)
+                foreach (Package package in packagelist)
                 {
-                    
-                    if (PkgsWhetherPicked[i]==0)
-                    {
-                        int x = (int)showDots[i].X;
+                    Dot dot = package.Departure();
+                    departurelist.Add(dot);
+                    logicDots.Add(Cvt.Dot2Point(Cvt.Dot2Point(dot)));
+                }
+                List<Point2f> showDots = new List<Point2f>(coordCvt.LogicToCamera(logicDots.ToArray()));
+
+                for (int i = 0; i < package_num; ++i)
+                {
+                    int x = (int)showDots[i].X;
                         int y = (int)showDots[i].Y;
                         int Tx = x - 11, Ty = y - 11, Tcol = Icon_Package.Cols, Trow = Icon_Package.Rows;
                         if (Tx < 0) Tx = 0;
@@ -532,25 +535,23 @@ namespace EDCHOST22
                         if (Ty + Trow > mat.Rows) Trow = mat.Rows - Ty;
                         Mat Pos = new Mat(mat, new Rect(Tx, Ty, Tcol, Trow));
                         Icon_Package.CopyTo(Pos);
-                        //Cv2.Circle(mat, x, y, 10, new Scalar(0x00, 0xff, 0xff),-1);
-                    }
                 }
             }
 
             //绘制泄洪口
-            Dot Dot1 = game.mFlood.dot1;
-            Dot Dot2 = game.mFlood.dot2;
-            Dot Dot3 = game.mFlood.dot3;
-            Dot Dot4 = game.mFlood.dot4;
-            Dot Dot5 = game.mFlood.dot5;
-
-            Point2f[] logicDots2 = { Cvt.Dot2Point(Dot1), Cvt.Dot2Point(Dot2), Cvt.Dot2Point(Dot3), Cvt.Dot2Point(Dot4), Cvt.Dot2Point(Dot5) };
+            List<Dot> stationlist = Station.StationOnStage();
+            int station_num = stationlist.GetLength();
+            List<Point2f> logicDots2 = List<Point2f>();
+            foreach(Dot dot in stationlist)
+            {
+                logicDots2.Add(Cvt.Dot2Point(dot));
+            }
            
-            for (int i = 0; i < game.mFlood.num; i++)
+            for (int i = 0; i < station_num; ++i)
             {
                 if(flags.calibrated)
                 {
-                    Point2f[] showDots2 = coordCvt.LogicToCamera(logicDots2);
+                    List<Point2f> showDots2 = List<Point2f>(coordCvt.LogicToCamera(logicDots2.ToArray()));
                     int x = (int)showDots2[i].X;
                     int y = (int)showDots2[i].Y;
                     int Tx = x - 11, Ty = y - 11, Tcol = Icon_Zone.Cols, Trow = Icon_Zone.Rows;
