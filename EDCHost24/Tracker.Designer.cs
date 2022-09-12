@@ -60,7 +60,7 @@
             this.BWall = new System.Windows.Forms.Label();
             this.AFlood = new System.Windows.Forms.Label();
             this.BFlood = new System.Windows.Forms.Label();
-            this.SetFlood = new System.Windows.Forms.Button();
+            this.SetStation = new System.Windows.Forms.Button();
             this.NextStage = new System.Windows.Forms.Button();
             this.label_BlueBG = new System.Windows.Forms.Label();
             this.LastStage = new System.Windows.Forms.Button();
@@ -111,7 +111,7 @@
             this.buttonPause.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonPause.Font = new System.Drawing.Font("微软雅黑 Light", 28F);
             this.buttonPause.ForeColor = System.Drawing.Color.Green;
-            this.buttonPause.Location = new System.Drawing.Point(1543, 746);
+            this.buttonPause.Location = new System.Drawing.Point(1543, 736);
             this.buttonPause.Margin = new System.Windows.Forms.Padding(2);
             this.buttonPause.Name = "buttonPause";
             this.buttonPause.Size = new System.Drawing.Size(250, 60);
@@ -145,7 +145,7 @@
             this.label_CarB.TabIndex = 31;
             this.label_CarB.Text = "B车";
             // 
-            // button_restart
+            // button_restart == button_end
             // 
             this.button_restart.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button_restart.Font = new System.Drawing.Font("微软雅黑 Light", 28F);
@@ -413,19 +413,19 @@
             this.BFlood.TabIndex = 116;
             this.BFlood.Text = "label2";
             // 
-            // SetFlood
+            // SetStation
             // 
-            this.SetFlood.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.SetFlood.Font = new System.Drawing.Font("微软雅黑 Light", 28F);
-            this.SetFlood.ForeColor = System.Drawing.Color.Green;
-            this.SetFlood.Location = new System.Drawing.Point(1543, 851);
-            this.SetFlood.Margin = new System.Windows.Forms.Padding(2);
-            this.SetFlood.Name = "SetFlood";
-            this.SetFlood.Size = new System.Drawing.Size(250, 60);
-            this.SetFlood.TabIndex = 117;
-            this.SetFlood.Text = "设置隔离区";
-            this.SetFlood.UseVisualStyleBackColor = true;
-            this.SetFlood.Click += new System.EventHandler(this.SetFlood_Click);
+            this.SetStation.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.SetStation.Font = new System.Drawing.Font("微软雅黑 Light", 28F);
+            this.SetStation.ForeColor = System.Drawing.Color.Green;
+            this.SetStation.Location = new System.Drawing.Point(1543, 880);
+            this.SetStation.Margin = new System.Windows.Forms.Padding(2);
+            this.SetStation.Name = "SetStation";
+            this.SetStation.Size = new System.Drawing.Size(250, 60);
+            this.SetStation.TabIndex = 117;
+            this.SetStation.Text = "设置站点";
+            this.SetStation.UseVisualStyleBackColor = true;
+            this.SetStation.Click += new System.EventHandler(this.SetStation_Click);
             // 
             // NextStage
             // 
@@ -502,7 +502,7 @@
             this.Controls.Add(this.CarGetIn);
             this.Controls.Add(this.LastStage);
             this.Controls.Add(this.NextStage);
-            this.Controls.Add(this.SetFlood);
+            this.Controls.Add(this.SetStation);
             this.Controls.Add(this.BFlood);
             this.Controls.Add(this.AFlood);
             this.Controls.Add(this.BWall);
@@ -574,7 +574,7 @@
         private System.Windows.Forms.Label BWall;
         private System.Windows.Forms.Label AFlood;
         private System.Windows.Forms.Label BFlood;
-        private System.Windows.Forms.Button SetFlood;
+        private System.Windows.Forms.Button SetStation;
         private System.Windows.Forms.Button NextStage;
         private System.Windows.Forms.Label label_BlueBG;
         private System.Windows.Forms.Button LastStage;

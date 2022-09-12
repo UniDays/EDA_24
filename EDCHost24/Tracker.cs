@@ -768,9 +768,9 @@ namespace EDCHOST22
             SetWindowSize();
         }
 
-        private void SetFlood_Click(object sender, EventArgs e)
+        private void SetStation_Click(object sender, EventArgs e)
         {
-            game.SetFloodArea();
+            
         }
 
         private void NextStage_Click(object sender, EventArgs e)
