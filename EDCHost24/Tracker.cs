@@ -336,6 +336,10 @@ namespace EDCHOST22
         public void PaintPattern(Mat mat, Localiser loc)
         {
             // 绘制边界点，在鼠标点击的场地的四个边界点上画上绿色小十字
+            // cv2: 图像绘制相关的库
+            // coordinate.ShowToCemera 坐标的透视变换
+            // cv::mat 是opencv里面的矩阵，用于存储图像数据
+            // 花了一个6*6的叉
             foreach (Point2f pt in coordCvt.ShowToCamera(showCornerPts))
             {
                 Cv2.Line(mat, (int)(pt.X - 3), (int)(pt.Y),
@@ -349,6 +353,7 @@ namespace EDCHOST22
             //Debug.WriteLine("{0}\n", loc.GetCentres(Camp.A).Count());
 
             //读取图标信息
+            //图像的信息是由矩阵来表示的
             Mat Icon_CarA, Icon_CarB, Icon_Package, Icon_Person, Icon_RedCross, Icon_Zone;
             Icon_CarA = new Mat(@"icon\\CARA.png", ImreadModes.Color);
             Icon_CarB = new Mat(@"icon\\CARB.png", ImreadModes.Color);
@@ -364,17 +369,19 @@ namespace EDCHOST22
             Cv2.Resize(Icon_RedCross, Icon_RedCross, new OpenCvSharp.Size(20, 20), 0, 0, InterpolationFlags.Cubic);
             Cv2.Resize(Icon_Zone, Icon_Zone, new OpenCvSharp.Size(22, 22), 0, 0, InterpolationFlags.Cubic);
 
-            // 在小车1的位置上绘制红色实心圆
-
+            
+            // 在小车的位置上绘制小车图案
             foreach (Point2i c1 in loc.GetCentres(Camp.A))
             {
                 int Tx = c1.X - 10, Ty = c1.Y - 10, Tcol = Icon_CarA.Cols, Trow = Icon_CarA.Rows;
                 if (Tx < 0) Tx = 0;
                 if (Ty < 0) Ty = 0;
+                // 如果超出了范围，则只绘制范围内的图像
                 if (Tx + Tcol > mat.Cols) Tcol = mat.Cols - Tx;
                 if (Ty + Trow > mat.Rows) Trow = mat.Rows - Ty;
                 Mat Pos = new Mat(mat, new Rect(Tx , Ty , Tcol, Trow));
                 Icon_CarA.CopyTo(Pos);
+                // 在小车1的位置上绘制红色实心圆
                // Cv2.Circle(mat, c1, 10, new Scalar(0x3c, 0x14, 0xdc), -1);
             }
             //Point2f[] camCentCarB = loc.GetCentres(Camp.B).ToArray();
@@ -382,29 +389,35 @@ namespace EDCHOST22
             foreach (Point2i c2 in loc.GetCentres(Camp.B))
             {
                 int Tx = c2.X - 10, Ty = c2.Y - 10, Tcol = Icon_CarB.Cols, Trow = Icon_CarB.Rows;
+                //Tcol: 小车图像的列的长度， TRow: 小车图像的行的长度
                 if (Tx < 0) Tx = 0;
                 if (Ty < 0) Ty = 0;
+                //这里存疑，为什么不是Tx + Tcol / 2 ？
                 if (Tx + Tcol > mat.Cols) Tcol = mat.Cols - Tx;
+                // 自动适应边界调整图像大小
                 if (Ty + Trow > mat.Rows) Trow = mat.Rows - Ty;
                 Mat Pos = new Mat(mat, new Rect(Tx, Ty, Tcol, Trow));
+                // CopyTo 将小车图像复制到整体图像相应的部分，实现了绘制小车图像
                 Icon_CarB.CopyTo(Pos);
                 //Cv2.Circle(mat, c2, 10, new Scalar(0xff, 0x00, 0x00), -1);
             }
             
-
+            // 这些是用来绘制passenger的，不是本届赛题的内容
             //绘制人员起始或终点位置， 并在当前位置和目标位置连线
             //目标点 绿色 正方形  边长16
             //连线 浅绿 线宽 3
             if (game.gameState == GameState.NORMAL 
                 && (game.gameStage == GameStage.FIRST_2 || game.gameStage == GameStage.LATTER_2))
             {
+                // 两种车颜色不一样，要分开绘制
                 if (game.UpperCamp == Camp.A)
                 {
 
                     Dot StartDot = game.curPsg.Start_Dot;
                     Dot EndDot = game.curPsg.End_Dot;
-
+                    // 逻辑坐标（指显示在屏幕上的坐标）
                     Point2f[] logicDots1 = { Cvt.Dot2Point(StartDot), Cvt.Dot2Point(EndDot) };
+                    // 相机坐标(?)
                     Point2f[] showDots1 = coordCvt.LogicToCamera(logicDots1);
 
                     if (game.CarB.mIsWithPassenger == 0)
@@ -413,7 +426,7 @@ namespace EDCHOST22
                         int x10 = (int)showDots1[0].X;
                         int y10 = (int)showDots1[0].Y;
 
-
+                        // 这里是不是重复计算了(?)
                         int Tx = x10 - 10, Ty = y10 - 10, Tcol = Icon_Person.Cols, Trow = Icon_Person.Rows;
                         if (Tx < 0) Tx = 0;
                         if (Ty < 0) Ty = 0;
