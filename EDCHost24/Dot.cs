@@ -33,7 +33,6 @@ namespace EDCHOST24
         {
             return (int)Math.Sqrt((A.x - B.x) * (A.x - B.x)
                 + (A.y - B.y) * (A.y - B.y));
-            // return int
         }
 
         //由于每个package、station和wall都要进行legal检测，故而用静态在每个类里检测

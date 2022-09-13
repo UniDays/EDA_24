@@ -82,9 +82,9 @@ namespace EDCHOST24
 
         
 
-        /***********************************************
-        Interface
-        ***********************************************/
+        /***********************************************************************
+        Interface used for Tracker to display the information of current game
+        ***********************************************************************/
         public Game()
         {
             Debug.WriteLine("Call Constructor of Game");
@@ -309,9 +309,13 @@ namespace EDCHOST24
             return MyMessage;
         }
 
-
-
-
+        /***********************************************************************
+        Interface used for Tracker to display the information of current game
+        ***********************************************************************/
+        List<Package> PackagesOnStage()
+        {
+            return mPackagesRemain;
+        }
 
         /***********************************************************************
         Private Functions
