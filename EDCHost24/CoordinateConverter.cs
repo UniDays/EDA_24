@@ -9,6 +9,7 @@ using System.Drawing;
 using System.IO;
 using System.IO.Ports;
 using System.Windows.Forms;
+// point2i名字的由来
 using Point2i = OpenCvSharp.Point;
 
 namespace EDCHOST22

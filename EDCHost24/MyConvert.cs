@@ -21,6 +21,7 @@ namespace EDCHOST22
             return temp;
         }
 
+        // dot和point2i之间的转换
         public static Point2i Dot2Point(Dot dot)
         {
             Point2i tmpPt = new Point2i(dot.x, dot.y);
