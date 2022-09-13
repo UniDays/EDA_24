@@ -55,7 +55,7 @@ namespace EDCHOST24
                     continue;
                 }
 
-                mPackageList.Add(new Package(Departure, Destination, 0));
+                mPackageList.Add(new Package(Departure, Destination, 0, i));
             }
 
 
@@ -75,7 +75,7 @@ namespace EDCHOST24
                 int GenerationTime = NRand.Next(LastGenerationTime, LastGenerationTime + TIME_INTERVAL);
 
                 LastGenerationTime = GenerationTime;
-                mPackageList.Add(new Package(Departure, Destination, 0));
+                mPackageList.Add(new Package(Departure, Destination, 0, i));
             }
         }
 
@@ -95,9 +95,16 @@ namespace EDCHOST24
             return mPackageList[mPointer++];
         }
 
-        public int NextGenerationTime()
+        
+        public Package LastGenerationPackage()
         {
-            return mPackageList[mPointer].GenerationTime();
+            return  mPackageList[mPointer - 1];
+        }
+        
+
+        public Package NextGenerationPackage()
+        {
+            return mPackageList[mPointer];
         }
 
         public void ResetPointer()

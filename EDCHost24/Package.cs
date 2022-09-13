@@ -14,11 +14,11 @@ namespace EDCHOST24
         public const int ARRIVE_NORMAL_CREDIT = 25;
         public const int ARRIVE_HARD_CREDIT = 30;
 
+        public const int OVER_TIME_PENALTY = 5; // per second
+
         private Dot mDeparture;     // Departure of Package
         private Dot mDestination;   // Destination of Package
 
-        // features added by EDA Host 24
-        // author : Alfred Dai
         // all times are in ms
         private int mGenerationTime;
         private int mScheduledDeliveryTime;
@@ -26,6 +26,7 @@ namespace EDCHOST24
         private int mPackageLevel;  //judge the package is easy/normal/hard to be arrived //0-easy; 1-normal; 2-hard;
 
         private int mScheduledScore;
+        private int mIndentityCode;
 
         // only called when need to generate default package
         public Package()
@@ -38,12 +39,13 @@ namespace EDCHOST24
             mScheduledScore = 0;
         }
 
-        public Package(Dot inDeparturePos, Dot inDestinationPos, int inGenerationTime)
+        public Package(Dot inDeparturePos, Dot inDestinationPos, int inGenerationTime, int inIndentityCode)
         {
             mDeparture = inDeparturePos;
             mDestination = inDestinationPos;
             mGenerationTime = inGenerationTime;
             mScheduledDeliveryTime = 20 * Dot.Distance(mDeparture, mDestination) + 1000;
+            mIndentityCode = inIndentityCode;
 
             //judge level
             if (mDeparture.x >= 40 && mDeparture.x <= 214 && mDeparture.y >= 40 && mDeparture.y <= 214
@@ -91,6 +93,11 @@ namespace EDCHOST24
             return mScheduledDeliveryTime;
         }
 
+        public int IndentityCode()
+        {
+            return mIndentityCode;
+        }
+
         public int Distance2Departure(Dot _CarPos)
         {
             return Dot.Distance(_CarPos, mDeparture);
@@ -104,6 +111,15 @@ namespace EDCHOST24
         public int GetPackageScore(int _ArrivalTime)
         {
             int PackageScore = 0;
+
+            if (_ArrivalTime <= mScheduledDeliveryTime)
+            {
+                PackageScore = mScheduledScore;
+            }
+            else
+            {
+                PackageScore = mScheduledScore + (mScheduledDeliveryTime - _ArrivalTime) * OVER_TIME_PENALTY / 1000;
+            }
 
             return PackageScore;
         }
