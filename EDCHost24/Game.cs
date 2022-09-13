@@ -18,7 +18,9 @@ using Boundary = EDCHOST24.Boundary;
 namespace EDCHOST24
 {
     // Token
+    // 当前游戏状态
     public enum GameState { UNSTART = 0, RUN = 1, PAUSE = 2, END = 3};
+    // 游戏阶段
 
     public enum GameStage { NONE = 0, FIRST_HALF = 1,  SENCOND_HALF= 2};
 
@@ -26,6 +28,7 @@ namespace EDCHOST24
     {
         
         // size of competition area
+        // 最大游戏场地
         public const int MAX_SIZE = 254;
         public const int AVAILIABLE_MAX_X = 254;
         public const int AVAILIABLE_MIN_X = 0;
