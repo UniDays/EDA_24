@@ -69,8 +69,7 @@ namespace EDCHOST24
         private List<Package> mPackagesRemain;
 
         // Charge station set by Team A and B
-        private Station mChargeStationA;
-        private Station mChargeStationB;
+        private Station mChargeStation;
 
         // which team is racing A or B
         private Camp mCamp;
@@ -79,6 +78,10 @@ namespace EDCHOST24
         private Labyrinth mObstacle;
 
         private Boundary mBoundary;
+
+        // flags represents whether package list has been generated
+        private bool hasFirstPackageListGenerated;
+        private bool hasSecondPackageListGenerated;
 
         
 
@@ -100,14 +103,18 @@ namespace EDCHOST24
             mScoreA = new int() {0,0};
             mScoreB = new int() {0,0};
 
+            /*
             // Generate the package series for first and second half
             mPackageFirstHalf = new PackageList(AVAILIABLE_MAX_X, AVAILIABLE_MIN_X, 
                         AVAILIABLE_MAX_Y, AVAILIABLE_MIN_Y, INITIAL_PKG_NUM, FIRST_HALF_TIME, TIME_INTERVAL);
             mPackageSecondHalf = new PackageList(AVAILIABLE_MAX_X, AVAILIABLE_MIN_X, 
                         AVAILIABLE_MAX_Y, AVAILIABLE_MIN_Y, INITIAL_PKG_NUM, SECOND_HALF_TIME, TIME_INTERVAL);
+            */
 
-            mChargeStationA = new Station ();
-            mChargeStationB = new Station ();
+            hasFirstPackageListGenerated = false;
+            hasSecondPackageListGenerated = false;
+
+            mChargeStation = new Station();
 
             mPackagesRemain = new List<Package> ();
 
@@ -186,12 +193,12 @@ namespace EDCHOST24
             if (mCamp == Camp.A)
             {
                 mCarA.SetChargeStation();
-                mChargeStationA.Add(mCarA.CurrentPos());
+                mChargeStation.Add(mCarA.CurrentPos(), 1);
             }
             else if (mCamp == Camp.B)
             {
                 mCarB.SetChargeStation();
-                mChargeStationB.Add(mCarB.CurrentPos());
+                mChargeStation.Add(mCarB.CurrentPos(), 2);
             }
         }
 
@@ -219,6 +226,19 @@ namespace EDCHOST24
             if (_GameStage != GameStage.FIRST_HALF || _GameStage != GameStage.SENCOND_HALF)
             {
                 Debug.WriteLine("Failed to set game stage! Expect input to be GameStage.FIRST_HALF or GameStage.SECOND_HALF");
+            }
+
+            // Generate the package list
+            if (!hasFirstPackageListGenerated && mGameStage == GameStage.FIRST_HALF)
+            {
+                mPackageFirstHalf = mPackageFirstHalf = new PackageList(AVAILIABLE_MAX_X, AVAILIABLE_MIN_X, 
+                        AVAILIABLE_MAX_Y, AVAILIABLE_MIN_Y, INITIAL_PKG_NUM, FIRST_HALF_TIME, TIME_INTERVAL, 0);
+            }
+
+            if (!hasSecondPackageListGenerated && mGameStage == GameStage.SENCOND_HALF)
+            {
+                mPackageFirstHalf = mPackageFirstHalf = new PackageList(AVAILIABLE_MAX_X, AVAILIABLE_MIN_X, 
+                        AVAILIABLE_MAX_Y, AVAILIABLE_MIN_Y, INITIAL_PKG_NUM, FIRST_HALF_TIME, TIME_INTERVAL, 1);
             }
 
             // set state param of game
@@ -411,11 +431,11 @@ namespace EDCHOST24
         {
             if (mCamp == Camp.A)
             {
-                return mChargeStationB.isCollided(_CarPos, COLLISION_RADIUS);
+                return mChargeStation.isCollided(_CarPos, 2, COLLISION_RADIUS);
             } 
             else if (mCamp == Camp.B)
             {
-                return mChargeStationA.isCollided(_CarPos, COLLISION_RADIUS);
+                return mChargeStation.isCollided(_CarPos, 1, COLLISION_RADIUS);
             }
             else
             {
@@ -425,17 +445,13 @@ namespace EDCHOST24
 
         private bool _IsInChargeStation(Dot _CarPos)
         {
-            if (mCamp == Camp.A)
+            if (mCamp == Camp.NONE)
             {
-                return mChargeStationA.isCollided(_CarPos, COLLISION_RADIUS);
-            } 
-            else if (mCamp == Camp.B)
-            {
-                return mChargeStationB.isCollided(_CarPos, COLLISION_RADIUS);
+                throw new Exception("No team is racing now");
             }
             else
             {
-                throw new Exception("No team is racing now");
+                return Station.isCollided(_CarPos, (int)mCamp, COLLISION_RADIUS);
             }
         }
     }
