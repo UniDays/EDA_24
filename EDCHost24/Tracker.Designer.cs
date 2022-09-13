@@ -157,7 +157,7 @@
             this.button_restart.TabIndex = 56;
             this.button_restart.Text = "新比赛";
             this.button_restart.UseVisualStyleBackColor = true;
-            this.button_restart.Click += new System.EventHandler(this.button_restart_Click);
+            this.button_restart.Click += new System.EventHandler(this.buttonContinue_Click);
             // 
             // button_video
             // 

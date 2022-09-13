@@ -13,6 +13,9 @@ using Point2i = OpenCvSharp.Point;
 using Cvt = EDCHOST22.MyConvert;
 using System.Runtime.InteropServices;
 using Game = EDCHOST24.Game;
+using Camp = EDCHOST24.Camp;
+using GameStage = EDCHOST24.GameStage;
+using Dot = EDCHOST24.Dot;
 
 namespace EDCHOST22
 {
@@ -193,14 +196,14 @@ namespace EDCHOST22
             Dot CarPosA =  Cvt.Point2Dot(logicCarA);
             Dot CarPosB = Cvt.Point2Dot(logicCarB);
 
-            // 更新比赛信息
+            // Update the information of car which is racing
             if (game.GetCamp == Camp.A)
             {
-                game.UpdateOnEachFrame(CarPosA, _HasMark, _SetChargeStation);
+                game.UpdateOnEachFrame(CarPosA);
             }
             else if (game.GetCamp == Camp.B)
             {
-                game.UpdateOnEachFrame(CarPosB, _HasMark, _SetChargeStation);
+                game.UpdateOnEachFrame(CarPosB);
             }
         }
 
@@ -588,7 +591,6 @@ namespace EDCHOST22
         private void ShowMessage(byte[] M)
         {
 
-
         }
 
         #endregion
@@ -669,13 +671,34 @@ namespace EDCHOST22
         }
 
 
-        // 比赛开始
+        // Choose the game stage to begin
+        private void bottonStartA_FirstHalf_Click(object sender, EventArgs e)
+        {
+            game.Start(Camp.A, GameStage.FIRST_HALF);
+        }
+
+        private void bottonStartB_FirstHalf_Click(object sender, EventArgs e)
+        {
+            game.Start(Camp.B, GameStage.FIRST_HALF);
+        }
+        private void bottonStartA_SecondHalf_Click(object sender, EventArgs e)
+        {
+            game.Start(Camp.A, GameStage.SENCOND_HALF);
+        }
+
+        private void bottonStartA_SecondHalf_Click(object sender, EventArgs e)
+        {
+            game.Start(Camp.b, GameStage.SENCOND_HALF);
+        }
+
+        /*
         private void buttonStart_Click(object sender, EventArgs e)
         {
             game.Start();
         }
+        */
 
-        // 比赛暂停（待完善）
+        // Pause
         private void buttonPause_Click(object sender, EventArgs e)
         {
             // to add something...
@@ -684,9 +707,10 @@ namespace EDCHOST22
             button_Continue.Enabled = true;
         }
 
-        // 比赛重新开始
-        private void button_restart_Click(object sender, EventArgs e)
+        // Continue
+        private void buttonContinue_Click(object sender, EventArgs e)
         {
+            /*
             string record = game.mLabyrinth.FileNameNow;
             lock (game) { game = new Game(); }
             game.mLabyrinth.ReadFromFile(record);
@@ -695,7 +719,26 @@ namespace EDCHOST22
             buttonPause.Enabled = false;
             label_CarA.Text = "A车";
             label_CarB.Text = "B车";
+            */
+            game.Continue();
         }
+
+        // End
+        private void buttonEnd_Click(object sender, EventArgs e)
+        {
+            game.End();
+        }
+
+        private void button_Foul_Click(object sender, EventArgs e)
+        {
+            game.GetMark();
+        }
+
+        private void button_SetStation_Click (object sender, EventArgs e)
+        {
+            game.SetChargeStation();
+        }
+
 
         // 开始录像
         private void button_video_Click(object sender, EventArgs e)
@@ -734,26 +777,6 @@ namespace EDCHOST22
             }
         }
 
-        // 继续比赛
-        private void button_Continue_Click(object sender, EventArgs e)
-        {
-            //if (game.state == GameState.End)
-            game.Continue();
-            buttonPause.Enabled = true;
-        }
-        // A车记1次犯规
-        private void button_AFoul_Click(object sender, EventArgs e)
-        {
-            game.GetMark();
-        }
-
-        // B车记1次犯规
-        private void button_BFoul_Click(object sender, EventArgs e)
-        {
-            game.GetMark();
-        }
-
-
         #endregion
 
 
@@ -766,11 +789,6 @@ namespace EDCHOST22
             SendMessage();
             //更新界面
             SetWindowSize();
-        }
-
-        private void SetFlood_Click(object sender, EventArgs e)
-        {
-            game.SetFloodArea();
         }
 
         private void NextStage_Click(object sender, EventArgs e)
@@ -786,31 +804,6 @@ namespace EDCHOST22
             game.gameStage--;
         }
 
-        private void CarGetIn_Click(object sender, EventArgs e)
-        {
-            if(game.gameStage==GameStage.FIRST_1)
-            {
-                game.CarA.CarGetIn();
-            }
-            if(game.gameStage==GameStage.LATTER_1)
-            {
-                game.CarB.CarGetIn();
-            }
-
-        }
-
-        private void GetOut_Click(object sender, EventArgs e)
-        {
-            if (game.gameStage == GameStage.FIRST_1)
-            {
-                game.CarA.CarGetOut();
-            }
-            if (game.gameStage == GameStage.LATTER_1)
-            {
-                game.CarB.CarGetOut();
-            }
-        }
-
 
         //计时器事件，每1s触发一次，向在迷宫内的小车发送信息
         private void timerMsg1s_Tick(object sender, EventArgs e)
@@ -818,71 +811,6 @@ namespace EDCHOST22
             game.UpdateCarLastOneSecondPos();
             game.SetFlood();
         }
-        #endregion
-
-
-        #region 被注释的代码 暂先保留
-        /*
-        private void buttonchangescore_click(object sender, eventargs e)
-        {
-            int ascore = (int)numericupdownscorea.value;
-            int bscore = (int)numericupdownscoreb.value;
-            numericupdownscorea.value = 0;
-            numericupdownscoreb.value = 0;
-            lock (game)
-            {
-                game.cara.score += ascore;
-                game.carb.score += bscore;
-            }
-        }
-
-        private void numericUpDownScoreA_ValueChanged(object sender, EventArgs e)
-        {
-            game.AddScore(Camp.CampA, (int)((NumericUpDown)sender).Value);
-            ((NumericUpDown)sender).Value = 0;
-        }
-
-        private void numericUpDownScoreB_ValueChanged(object sender, EventArgs e)
-        {
-            game.AddScore(Camp.CampB, (int)((NumericUpDown)sender).Value);
-            ((NumericUpDown)sender).Value = 0;
-        }
-
-        //绘制人员信息
-        private void groupBox_Person_Paint(object sender, PaintEventArgs e)
-        {
-            Brush br_No_NV = new SolidBrush(Color.Silver);
-            Brush br_No_V = new SolidBrush(Color.DimGray);
-            Brush br_A_NV = new SolidBrush(Color.Pink);
-            Brush br_A_V = new SolidBrush(Color.Red);
-            Brush br_B_NV = new SolidBrush(Color.SkyBlue);
-            Brush br_B_V = new SolidBrush(Color.RoyalBlue);
-            Graphics gra = e.Graphics;
-            int vbargin = 100;
-            for (int i = 0; i != game.CurrPersonNumber; ++i)
-            {
-                switch (game.People[i].Owner)
-                {
-                    case Camp.None:
-                        gra.FillEllipse(br_No_V, 40, 100 + i * vbargin, 30, 30);
-                        gra.FillEllipse(br_A_NV, 100, 100 + i * vbargin, 30, 30);
-                        gra.FillEllipse(br_B_NV, 160, 100 + i * vbargin, 30, 30);
-                        break;
-                    case Camp.CampA:
-                        gra.FillEllipse(br_No_NV, 40, 100 + i * vbargin, 30, 30);
-                        gra.FillEllipse(br_A_V, 100, 100 + i * vbargin, 30, 30);
-                        gra.FillEllipse(br_B_NV, 160, 100 + i * vbargin, 30, 30);
-                        break;
-                    case Camp.CampB:
-                        gra.FillEllipse(br_No_NV, 40, 100 + i * vbargin, 30, 30);
-                        gra.FillEllipse(br_A_NV, 100, 100 + i * vbargin, 30, 30);
-                        gra.FillEllipse(br_B_V, 160, 100 + i * vbargin, 30, 30);
-                        break;
-                    default: break;
-                }
-            }
-        }
-        */
         #endregion
     }
 

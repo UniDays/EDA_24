@@ -103,14 +103,6 @@ namespace EDCHOST24
             mScoreA = new int() {0,0};
             mScoreB = new int() {0,0};
 
-            /*
-            // Generate the package series for first and second half
-            mPackageFirstHalf = new PackageList(AVAILIABLE_MAX_X, AVAILIABLE_MIN_X, 
-                        AVAILIABLE_MAX_Y, AVAILIABLE_MIN_Y, INITIAL_PKG_NUM, FIRST_HALF_TIME, TIME_INTERVAL);
-            mPackageSecondHalf = new PackageList(AVAILIABLE_MAX_X, AVAILIABLE_MIN_X, 
-                        AVAILIABLE_MAX_Y, AVAILIABLE_MIN_Y, INITIAL_PKG_NUM, SECOND_HALF_TIME, TIME_INTERVAL);
-            */
-
             hasFirstPackageListGenerated = false;
             hasSecondPackageListGenerated = false;
 
@@ -184,7 +176,7 @@ namespace EDCHOST24
             if (mTimeRemain <= 0)
             {
                 mGameState = GameState.END;
-                Debug.WriteLine("Time remain is up to 0. The End.");
+                Debug.WriteLine("Time remaining is up to 0. The End.");
             }
         }
 
