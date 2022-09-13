@@ -216,7 +216,22 @@ namespace EDCHOST24
             return mQueuePos[-1];
         }
 
+        public Package GetPackageOnCar(int _index)
+        {
+            if (_index >= mPickedPackages.Count)
+            {
+                return new Package();
+            }
+            else
+            {
+                return mPickedPackages[_index].mPkg;
+            }
+        }
 
+        public Package GetPackageCount()
+        {
+            return mPickedPackages.Count;
+        }
 
 
         /********************************************

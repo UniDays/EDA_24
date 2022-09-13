@@ -92,8 +92,7 @@ namespace EDCHOST24
 
         public Package GeneratePackage()
         {
-            mPointer++;
-            return mPackageList[mPointer - 1];
+            return mPackageList[mPointer++];
         }
 
         public int NextGenerationTime()

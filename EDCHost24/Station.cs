@@ -24,7 +24,7 @@ namespace EDCHOST24
         public Station() //构造函数
         {
             List<Dot> mStationList1 = new List<Dot>();
-            List<Dot> mStationList2 = new List<DateTimeOffset>();
+            List<Dot> mStationList2 = new List<Dot>();
         }
 
         private List<Dot> StationList(int _Type)
@@ -80,7 +80,7 @@ namespace EDCHOST24
             {
                 return mStationList[i];
             }
-            return new Dot(-1, -1);
+            return new Dot(0xff, 0xff);
         }
 
         public List<Dot> StationOnStage(int _Type)

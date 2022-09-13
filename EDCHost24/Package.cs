@@ -27,6 +27,17 @@ namespace EDCHOST24
 
         private int mScheduledScore;
 
+        // only called when need to generate default package
+        public Package()
+        {
+            mDeparture = new Dot(0xff, 0xff);
+            mDestination = new Dot (0xff, 0xff);
+            mGenerationTime = 0xff;
+            mScheduledDeliveryTime = 0xff;
+            mPackageLevel = 0;
+            mScheduledScore = 0;
+        }
+
         public Package(Dot inDeparturePos, Dot inDestinationPos, int inGenerationTime)
         {
             mDeparture = inDeparturePos;

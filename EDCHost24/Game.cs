@@ -50,6 +50,10 @@ namespace EDCHOST24
         public const int FIRST_HALF_TIME = 60000;
         public const int SECOND_HALF_TIME = 180000;
 
+        // Message Token
+        public const byte START = 0xff;
+        public const byte END = 0;
+
         // state
         public GameStage mGameStage;
         public GameState mGameState;
@@ -304,6 +308,16 @@ namespace EDCHOST24
                 mScoreB[(int)mGameStage - 1] = mCarB.GetScore();
                 mCarB.Reset();
             }
+            
+            // Reset pointer which used to genrate packages
+            if (mGameStage ==  GameStage.FIRST_HALF)
+            {
+                mPackageFirstHalf.ResetPointer();
+            }
+            else if (mGameStage ==  GameStage.SENCOND_HALF)
+            {
+                mPackageSecondHalf.ResetPointer();
+            }
 
             // set state param of game
             mGameState = GameState.UNSTART;
@@ -319,9 +333,65 @@ namespace EDCHOST24
         public byte[] Message()
         {
             byte[] MyMessage = new byte[100];
+            int Index = 0;
             if (mCamp == Camp.A)
             {
+                // GameStage
+                MyMessage[Index++] = (byte) mGameStage;
+                // GameTime 
+                MyMessage[Index++] = (byte) ((mGameTime/100) >> 8);
+                MyMessage[Index++] = (byte) (mGameTime/100);
+
+                // TimeRemain
+                MyMessage[Index++] = (byte) ((mTimeRemain/100) >> 8);
+                MyMessage[Index++] = (byte) (mTimeRemain/100);
+
+
+                // Obstacle
+                // Add your code here...
+
+
+                // Your Charge Station
+                MyMessage[Index++] = (byte) mChargeStation(0, 0);
+                MyMessage[Index++] = (byte) mChargeStation(1, 0);
+                MyMessage[Index++] = (byte) mChargeStation(2, 0);
+
+                // Oppenont's Charge Station
+                MyMessage[Index++] = (byte) mChargeStation(0, 1);
+                MyMessage[Index++] = (byte) mChargeStation(1, 1);
+                MyMessage[Index++] = (byte) mChargeStation(2, 1);
+
+                // Score
+                MyMessage[Index++] = (byte) (mCarA.GetScore() >> 8);
+                MyMessage[Index++] = (byte) (mCarA.GetScore());
+
+                // Car Position
+                MyMessage[Index++] = (byte) (mCarA.CurrentPos().x);
+                MyMessage[Index++] = (byte) (mCarA.CurrentPos().y);
+
+                // Car's Package List
+                MyMessage[Index++] = (byte) (mCarA.GetPackageCount());
+                // Destinaton, Scheduled Time
+                for (int i = 0;i < 5;i++)
+                {
+                    MyMessage[Index++] = (byte) (mCarA.GetPackageOnCar(i).Destination().x);
+                    MyMessage[Index++] = (byte) (mCarA.GetPackageOnCar(i).Destination().y);
+                    MyMessage[Index++] = (byte) (mCarA.GetPackageOnCar(i).ScheduledDeliveryTime()/100 >> 8);
+                    MyMessage[Index++] = (byte) (mCarA.GetPackageOnCar(i).ScheduledDeliveryTime());
+                }
+
+
+                // Packages Generate on this frame
+                // Departure, Destination, Scheduled Time
                 
+
+
+
+
+                // 
+
+
+
             }
             else if (mCamp == Camp.B)
             {
