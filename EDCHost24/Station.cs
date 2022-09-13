@@ -10,7 +10,7 @@ namespace EDCHOST24
     class Station //所有站点
     {
         private int MAX_STATION = 3;
-        private static List<Dot> mStationList; //一个包含站点位置信息的list
+        private List<Dot> mStationList; //一个包含站点位置信息的list
         public void Reset()
         {
             mStationList.Clear();
@@ -39,7 +39,7 @@ namespace EDCHOST24
             }
         }
 
-        public static bool isCollided(Dot _CarPos, int r=0)
+        public static bool isCollided(Dot _CarPos, int _Type = 0, int r = 8 )
         {
             foreach (Dot station in mStationList)
             {

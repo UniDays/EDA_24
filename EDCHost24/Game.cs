@@ -125,6 +125,7 @@ namespace EDCHOST24
         ***********************************************/
         public void UpdateOnEachFrame(Dot _CarPos)
         {
+            // check the game state
             if (mGameState == GameState.UNSTART)
             {
                 Debug.WriteLine("Failed to update on frame! The game state is unstart.");
@@ -155,7 +156,7 @@ namespace EDCHOST24
 
             int TimePenalty = 0;
 
-            // Update car's info
+            // Update car's info on each frame
             if (mCamp == Camp.A)
             {
                 mCarA.Update(_CarPos, mGameTime, _IsOnBlackLine(_CarPos), 
@@ -217,7 +218,7 @@ namespace EDCHOST24
 
             if (_GameStage != GameStage.FIRST_HALF || _GameStage != GameStage.SENCOND_HALF)
             {
-                Debug.WriteLine("Failed to change game stage! Expect input to be GameStage.FIRST_HALF or GameStage.SECOND_HALF");
+                Debug.WriteLine("Failed to set game stage! Expect input to be GameStage.FIRST_HALF or GameStage.SECOND_HALF");
             }
 
             // set state param of game
@@ -257,11 +258,16 @@ namespace EDCHOST24
                 Debug.WriteLine("Pause failed! No race is going on.");
                 return;
             }
+            mGameState = GameState.PAUSE;
         }
 
         public void Continue()
         {
-
+            if (mGameState != GameState.PAUSE)
+            {
+                Debug.WriteLine("Continue Failed! No race is suspended");
+            }
+            mGameState = GameState.RUN;
         }
 
         // finish on a manul mode

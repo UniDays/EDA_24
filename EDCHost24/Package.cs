@@ -96,11 +96,5 @@ namespace EDCHOST24
 
             return PackageScore;
         }
-
-        public bool IsDotExisted(Dot NewPos)
-        {
-            return (NewPos==mDeparture)||(NewPos==mDestination);
-        }
-
     }
 }

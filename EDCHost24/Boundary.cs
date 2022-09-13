@@ -31,7 +31,7 @@ namespace EDCHOST24
             mWall[3] = Wall(Dot(size1, size1), Dot(size + height, size1));
         }
 
-        public static bool isCollided(Dot CarPos, int radius)
+        public static bool isCollided(Dot CarPos, int radius = 8)
         {
             if (Carpos.x > mMap / 2)
             {

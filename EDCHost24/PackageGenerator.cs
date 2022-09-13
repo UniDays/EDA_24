@@ -4,6 +4,9 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using Station = EDCHOST24.Station;
+using Labyrinth = EDCHOST24.Labyrinth;
+using Boundary = EDCHOST24.Boundary;
 
 namespace EDCHOST24
 {
@@ -22,7 +25,11 @@ namespace EDCHOST24
         // point to the next generated package 
         public int mPointer;
 
-        public PackageList(int _X_MAX, int _X_MIN, int _Y_MAX, int _Y_MIN, int _INITIAL_AMOUNT, int _LIMITED_TIME, int _TIME_INTERVAL) //生成指定数量的物资
+        // stage represents first or second half of the race
+        // stage == 0, first half
+        // stage == 1, second half
+        public PackageList(int _X_MAX, int _X_MIN, int _Y_MAX, int _Y_MIN, 
+            int _INITIAL_AMOUNT, int _LIMITED_TIME, int _TIME_INTERVAL, int stage)
         {
             mPointer = _INITIAL_AMOUNT;
 
@@ -42,7 +49,7 @@ namespace EDCHOST24
                 Dot Departure = new Dot(NRand.Next(X_MIN, X_MAX), NRand.Next(Y_MIN, Y_MAX));
                 Dot Destination = new Dot(NRand.Next(X_MIN, X_MAX), NRand.Next(Y_MIN, Y_MAX));
 
-                if (!(Dot.IsPosLegal(Departure) && Dot.IsPosLegal(Destination)))
+                if (!(IsPosLegal(Departure, stage) && IsPosLegal(Destination, stage)))
                 {
                     i--;
                     continue;
@@ -59,7 +66,7 @@ namespace EDCHOST24
                 Dot Departure = new Dot(NRand.Next(X_MIN, X_MAX), NRand.Next(Y_MIN, Y_MAX));
                 Dot Destination = new Dot(NRand.Next(X_MIN, X_MAX), NRand.Next(Y_MIN, Y_MAX));
 
-                if (!(Dot.IsPosLegal(Departure) && Dot.IsPosLegal(Destination)))
+                if (!(IsPosLegal(Departure, stage) && IsPosLegal(Destination, stage)))
                 {
                     i--;
                     continue;
@@ -113,5 +120,16 @@ namespace EDCHOST24
             return false;
         }
 
+        private static bool IsPosLegal(Dot _dot, int _Type = 0)
+        {
+            if (_Type == 0)
+            {
+                return !(Boundary.isCollided(_dot) || Labyrinth.isCollided(_dot));
+            }
+            else if (_Type == 1)
+            {
+                return !(Boundary.isCollided(_dot) || Labyrinth.isCollided(_dot) || Station.isCollided(_dot, 0));
+            }
+        }
     }
 }
