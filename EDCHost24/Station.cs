@@ -11,8 +11,10 @@ namespace EDCHOST24
     {
         private int MAX_STATION = 3;
 
+
         private List<Dot> mStationList1; //一个包含站点位置信息的list
         private List<Dot> mStationList2;
+
 
         public void Reset()
         {
@@ -36,6 +38,7 @@ namespace EDCHOST24
                 return mStationList2;
             }
         }
+
         public void Add(Dot _inPos, int _Type = 0)
         {
             List<Dot> mStationList = StationList(_Type);
