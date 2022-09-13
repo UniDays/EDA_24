@@ -791,6 +791,13 @@ namespace EDCHOST22
             SetWindowSize();
         }
 
+
+        private void SetStation_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+
         private void NextStage_Click(object sender, EventArgs e)
         {
             game.mGameTime = 200000;
