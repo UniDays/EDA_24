@@ -12,7 +12,7 @@ namespace EDCHOST24
     public class Labyrinth
     {
         public List<string> LabyName;
-        public int mWallNum;
+        public const int MAX_WALL_NUM = 8;
         public Wall[] mpWallList;
         public string FileNameNow;
 
@@ -25,14 +25,10 @@ namespace EDCHOST24
         {
             IsLabySet = false;
             // 默认的障碍物数量是8个
-            mWallNum = 8;
-            mpWallList = new Wall[mWallNum];
+            mpWallList = new Wall[MAX_WALL_NUM];
             LabyName = new List<string>();
 
-            for (int i = 0; i < mWallNum; i++)
-            {
-                mpWallList[i] = new Wall(new Dot(0, 0), new Dot(0, 0));
-            }
+            mpWallList = new Wall[MAX_WALL_NUM] {new Dot(0, 0), new Dot (0,0)};
         }
 
         // 从文本读取障碍物信息
@@ -42,7 +38,7 @@ namespace EDCHOST24
             {
                 IsLabySet = false;
                 TextReader reader = File.OpenText("labyrinth/" + FileName);
-                for (int i = 0; i < mWallNum; i++)
+                for (int i = 0; i < MAX_WALL_NUM; i++)
                 {
                     string text = reader.ReadLine();
                     string[] bits = text.Split(' ');

@@ -89,8 +89,7 @@ namespace EDCHOST24
         // flags represents whether package list has been generated
         private bool hasFirstPackageListGenerated;
         private bool hasSecondPackageListGenerated;
-
-        
+    
 
         /***********************************************************************
         Interface used for Tracker to display the information of current game
@@ -147,7 +146,6 @@ namespace EDCHOST24
                Debug.WriteLine("Failed to update on frame! The game state is end.");
                return;
             }
-
 
             if (mCamp == Camp.NONE)
             {
@@ -222,7 +220,7 @@ namespace EDCHOST24
                 return;
             }
 
-            if (_GameStage != GameStage.FIRST_HALF || _GameStage != GameStage.SENCOND_HALF)
+            if (_GameStage != GameStage.FIRST_HALF && _GameStage != GameStage.SENCOND_HALF)
             {
                 Debug.WriteLine("Failed to set game stage! Expect input to be GameStage.FIRST_HALF or GameStage.SECOND_HALF");
             }
@@ -334,8 +332,11 @@ namespace EDCHOST24
         {
             byte[] MyMessage = new byte[100];
             int Index = 0;
-
+            // Game Stage
             MyMessage[Index++] = (byte) mGameStage;
+            // Game State
+            MyMessage[Index++] = (byte) mGameState;
+
             // GameTime 
             MyMessage[Index++] = (byte) ((mGameTime/100) >> 8);
             MyMessage[Index++] = (byte) (mGameTime/100);
@@ -358,14 +359,20 @@ namespace EDCHOST24
             if (mCamp == Camp.A)
             {
                 // Your Charge Station
-                MyMessage[Index++] = (byte) mChargeStation.Index(0, 0);
-                MyMessage[Index++] = (byte) mChargeStation.Index(1, 0);
-                MyMessage[Index++] = (byte) mChargeStation.Index(2, 0);
+                MyMessage[Index++] = (byte) mChargeStation.Index(0, 0).x;
+                MyMessage[Index++] = (byte) mChargeStation.Index(0, 0).y;
+                MyMessage[Index++] = (byte) mChargeStation.Index(1, 0).x;
+                MyMessage[Index++] = (byte) mChargeStation.Index(1, 0).y;
+                MyMessage[Index++] = (byte) mChargeStation.Index(2, 0).x;
+                MyMessage[Index++] = (byte) mChargeStation.Index(2, 0).y;
 
                 // Oppenont's Charge Station
-                MyMessage[Index++] = (byte) mChargeStation.Index(0, 1);
-                MyMessage[Index++] = (byte) mChargeStation.Index(1, 1);
-                MyMessage[Index++] = (byte) mChargeStation.Index(2, 1);
+                MyMessage[Index++] = (byte) mChargeStation.Index(0, 1).x;
+                MyMessage[Index++] = (byte) mChargeStation.Index(0, 1).y;
+                MyMessage[Index++] = (byte) mChargeStation.Index(1, 1).x;
+                MyMessage[Index++] = (byte) mChargeStation.Index(1, 1).y;
+                MyMessage[Index++] = (byte) mChargeStation.Index(2, 1).x;
+                MyMessage[Index++] = (byte) mChargeStation.Index(2, 1).y;
 
                 // Score
                 MyMessage[Index++] = (byte) (mCarA.GetScore() >> 8);
@@ -389,14 +396,20 @@ namespace EDCHOST24
             else if (mCamp == Camp.B)
             {
                 // Your Charge Station
-               MyMessage[Index++] = (byte) mChargeStation.Index(0, 1);
-                MyMessage[Index++] = (byte) mChargeStation.Index(1, 1);
-                MyMessage[Index++] = (byte) mChargeStation.Index(2, 1);
+                MyMessage[Index++] = (byte) mChargeStation.Index(0, 1).x;
+                MyMessage[Index++] = (byte) mChargeStation.Index(0, 1).y;
+                MyMessage[Index++] = (byte) mChargeStation.Index(1, 1).x;
+                MyMessage[Index++] = (byte) mChargeStation.Index(1, 1).y;
+                MyMessage[Index++] = (byte) mChargeStation.Index(2, 1).x;
+                MyMessage[Index++] = (byte) mChargeStation.Index(2, 1).y;
 
                 // Oppenont's Charge Station
-                MyMessage[Index++] = (byte) mChargeStation.Index(0, 0);
-                MyMessage[Index++] = (byte) mChargeStation.Index(1, 0);
-                MyMessage[Index++] = (byte) mChargeStation.Index(2, 0);
+                MyMessage[Index++] = (byte) mChargeStation.Index(0, 0).x;
+                MyMessage[Index++] = (byte) mChargeStation.Index(0, 0).y;
+                MyMessage[Index++] = (byte) mChargeStation.Index(1, 0).x;
+                MyMessage[Index++] = (byte) mChargeStation.Index(1, 0).y;
+                MyMessage[Index++] = (byte) mChargeStation.Index(2, 0).x;
+                MyMessage[Index++] = (byte) mChargeStation.Index(2, 0).y;
 
                 // Score
                 MyMessage[Index++] = (byte) (mCarB.GetScore() >> 8);
@@ -407,6 +420,7 @@ namespace EDCHOST24
                 MyMessage[Index++] = (byte) (mCarB.CurrentPos().y);
 
                 // Car's Package List
+                // Total numbrt of picked packages
                 MyMessage[Index++] = (byte) (mCarB.GetPackageCount());
                 // Destinaton, Scheduled Time
                 for (int i = 0;i < 5;i++)
@@ -417,6 +431,7 @@ namespace EDCHOST24
                     MyMessage[Index++] = (byte) (mCarB.GetPackageOnCar(i).ScheduledDeliveryTime());
                 }
             }
+
             // Packages Generate on this frame
             // Indentity Code, Departure, Destination, Scheduled Time
             if (mGameStage == GameStage.FIRST_HALF) 
@@ -439,17 +454,23 @@ namespace EDCHOST24
                 MyMessage[Index++] = (byte) (mPackageSecondHalf.LastGenerationPackage().ScheduledDeliveryTime()/100 >> 8);
                 MyMessage[Index++] = (byte) (mPackageSecondHalf.LastGenerationPackage().ScheduledDeliveryTime()/100);
             }
-            
+
             return MyMessage;
         }
 
         /***********************************************************************
         Interface used for Tracker to display the information of current game
         ***********************************************************************/
-        List<Package> PackagesOnStage()
+        public List<Package> PackagesOnStage()
         {
             return mPackagesRemain;
         }
+
+        public Camp GetCamp()
+        {
+            return mCamp;
+        }
+        
 
         /***********************************************************************
         Private Functions
@@ -495,7 +516,7 @@ namespace EDCHOST24
             else if (mGameStage == GameStage.SENCOND_HALF &&
                 mGameTime >= mPackageSecondHalf.NextGenerationTime)
             {
-                mPackagesRemain.Add(mPackageSecondHalf.NextGenerationPackage().GenerationTime());
+                mPackagesRemain.Add(mPackageSecondHalf.GeneratePackage());
                 return true;
             }
             else

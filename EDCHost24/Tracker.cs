@@ -17,7 +17,7 @@ using Camp = EDCHOST24.Camp;
 using GameStage = EDCHOST24.GameStage;
 using Dot = EDCHOST24.Dot;
 
-namespace EDCHOST22
+namespace EDCHOST24
 {
     public partial class Tracker : Form
     {
@@ -237,17 +237,17 @@ namespace EDCHOST22
         #region 向小车传送信息
         private void SendMessage()
         {
-            // 打包好要发给A车的信息
+            // get message from game
             byte[] Message = game.Message();
 
-            // 通过串口1发送给A车
-            if (game.GetCamp == Camp.A && serial1 != null && serial1.IsOpen)
+            // send message to car
+            if (game.GetCamp() == Camp.A && serial1 != null && serial1.IsOpen)
             {
-                serial1.Write(Message, 0, 100);
+                serial1.Write(Message, 0, 82);
             }
-            else if (game.GetCamp == Camp.B && serial2 != null && serial2.IsOpen)
+            else if (game.GetCamp() == Camp.B && serial2 != null && serial2.IsOpen)
             {
-                serial2.Write(Message, 0, 100);
+                serial2.Write(Message, 0, 82);
             }
             ShowMessage(Message);
             validPorts = SerialPort.GetPortNames();
@@ -632,35 +632,15 @@ namespace EDCHOST22
             game.Start(Camp.b, GameStage.SENCOND_HALF);
         }
 
-        /*
-        private void buttonStart_Click(object sender, EventArgs e)
-        {
-            game.Start();
-        }
-        */
-
         // Pause
         private void buttonPause_Click(object sender, EventArgs e)
         {
-            // to add something...
             game.Pause();
-            buttonPause.Enabled = false;
-            button_Continue.Enabled = true;
         }
 
         // Continue
         private void buttonContinue_Click(object sender, EventArgs e)
         {
-            /*
-            string record = game.mLabyrinth.FileNameNow;
-            lock (game) { game = new Game(); }
-            game.mLabyrinth.ReadFromFile(record);
-            buttonStart.Enabled = true;
-            button_Continue.Enabled = false;
-            buttonPause.Enabled = false;
-            label_CarA.Text = "A车";
-            label_CarB.Text = "B车";
-            */
             game.Continue();
         }
 
@@ -670,12 +650,13 @@ namespace EDCHOST22
             game.End();
         }
 
-        private void button_Foul_Click(object sender, EventArgs e)
+        // Get foul mark
+        private void buttonFoul_Click(object sender, EventArgs e)
         {
             game.GetMark();
         }
 
-        private void button_SetStation_Click (object sender, EventArgs e)
+        private void buttonSetStation_Click (object sender, EventArgs e)
         {
             game.SetChargeStation();
         }
@@ -732,33 +713,6 @@ namespace EDCHOST22
             SetWindowSize();
         }
 
-
-        private void SetStation_Click(object sender, EventArgs e)
-        {
-            
-        }
-
-
-        private void NextStage_Click(object sender, EventArgs e)
-        {
-            game.mGameTime = 200000;
-            game.CheckNextStage();
-            game.mGameTime = 0;
-        }
-
-        private void LastStage_Click(object sender, EventArgs e)
-        {
-            game.mGameTime = 0;
-            game.gameStage--;
-        }
-
-
-        //计时器事件，每1s触发一次，向在迷宫内的小车发送信息
-        private void timerMsg1s_Tick(object sender, EventArgs e)
-        {
-            game.UpdateCarLastOneSecondPos();
-            game.SetFlood();
-        }
         #endregion
     }
 
