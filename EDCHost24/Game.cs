@@ -69,8 +69,8 @@ namespace EDCHOST24
 
         private int[] mScoreA, mScoreB;
 
-        private PackageList mPackageFirstHalf;
-        private PackageList mPackageSecondHalf;
+        private PackageList mPackageFirstHalf = null;
+        private PackageList mPackageSecondHalf = null;
 
         // store the packages on the field
         private List<Package> mPackagesRemain;
@@ -103,11 +103,11 @@ namespace EDCHOST24
 
             mCamp = Camp.NONE;
 
-            mCarA = new Car(Camp.A, 0);
-            mCarB = new Car(Camp.B, 0);
+            mCarA = new Car(Camp.A);
+            mCarB = new Car(Camp.B);
 
-            mScoreA = new int() {0,0};
-            mScoreB = new int() {0,0};
+            mScoreA = new int[] {0,0};
+            mScoreB = new int[] {0,0};
 
             hasFirstPackageListGenerated = false;
             hasSecondPackageListGenerated = false;
@@ -136,7 +136,7 @@ namespace EDCHOST24
                 Debug.WriteLine("Failed to update on frame! The game state is unstart.");
                 return;
             } 
-            else if (mGameState = GameState.PAUSE)
+            else if (mGameState == GameState.PAUSE)
             {
                 Debug.WriteLine("Failed to update on frame! The game state is pause.");
                 return;
@@ -149,7 +149,7 @@ namespace EDCHOST24
 
             if (mCamp == Camp.NONE)
             {
-                Debug.WriteLine("Failed to update on frame! Camp is none which expects to be A or B");
+                Debug.WriteLine("Failed to update on frame! Camp is none which expects to be A or B.");
                 return;
             }
 
@@ -165,13 +165,13 @@ namespace EDCHOST24
             {
                 mCarA.Update(_CarPos, mGameTime, _IsOnBlackLine(_CarPos), 
                 _IsInObstacle(_CarPos), _IsInOpponentStation(_CarPos), 
-                _IsInChargeStation(_CarPos), mPackagesRemain, TimePenalty);
+                _IsInChargeStation(_CarPos), ref mPackagesRemain, out TimePenalty);
             }
             else if (mCamp == Camp.B)
             {
                 mCarB.Update(_CarPos, mGameTime, _IsOnBlackLine(_CarPos), 
                 _IsInObstacle(_CarPos), _IsInOpponentStation(_CarPos), 
-                _IsInChargeStation(_CarPos), mPackagesRemain, TimePenalty);
+                _IsInChargeStation(_CarPos), ref mPackagesRemain, out TimePenalty);
             }
 
             //update times remain
@@ -190,12 +190,12 @@ namespace EDCHOST24
             if (mCamp == Camp.A)
             {
                 mCarA.SetChargeStation();
-                mChargeStation.Add(mCarA.CurrentPos(), 1);
+                mChargeStation.Add(mCarA.CurrentPos(), 0);
             }
             else if (mCamp == Camp.B)
             {
                 mCarB.SetChargeStation();
-                mChargeStation.Add(mCarB.CurrentPos(), 2);
+                mChargeStation.Add(mCarB.CurrentPos(), 1);
             }
         }
 
@@ -255,11 +255,11 @@ namespace EDCHOST24
             // initial packages on the field
             _InitialPackagesRemain();
 
-            if (mGameStage = GameStage.FIRST_HALF)
+            if (mGameStage == GameStage.FIRST_HALF)
             {
                 mTimeRemain = FIRST_HALF_TIME;
             }
-            else if (mGameStage = GameStage.SENCOND_HALF)
+            else if (mGameStage == GameStage.SENCOND_HALF)
             {
                 mTimeRemain = SECOND_HALF_TIME;
             }
@@ -471,6 +471,40 @@ namespace EDCHOST24
             return mCamp;
         }
         
+        public int GetScore (Camp c, GameStage gs)
+        {
+            if (gs == GameStage.NONE)
+            {
+                Debug.WriteLine("Failed to get score! Game stage expects to be first-half or second-half.");
+            }
+
+            if (c == Camp.A)
+            {
+                return mScoreA[(int)gs - 1];
+            }
+            else if (c == Camp.B)
+            {
+                return mScoreA[(int)gs - 1];
+            }
+
+            return 0;
+        }
+
+        public int GetMileage()
+        {
+            if (mCamp == Camp.A)
+            {
+                return mCarA.GetMileage();
+            }
+            else if (mCamp == Camp.B)
+            {
+                return mCarB.GetMileage();
+            }
+            else
+            {
+                return 0;
+            }
+        }
 
         /***********************************************************************
         Private Functions
@@ -485,7 +519,7 @@ namespace EDCHOST24
 
             if (mGameStage == GameStage.FIRST_HALF)
             {
-                for (int i = 0;i < mPackageFirstHalf.Amount;i++)
+                for (int i = 0;i < mPackageFirstHalf.Amount();i++)
                 {
                     mPackagesRemain.Add(mPackageFirstHalf.Index(i));
                 }
@@ -493,7 +527,7 @@ namespace EDCHOST24
             }
             else if (mGameStage == GameStage.SENCOND_HALF)
             {
-                for (int i = 0;i < mPackageSecondHalf.Amount;i++)
+                for (int i = 0;i < mPackageSecondHalf.Amount();i++)
                 {
                     mPackagesRemain.Add(mPackageSecondHalf.Index(i));
                 }
@@ -514,7 +548,7 @@ namespace EDCHOST24
                 return true;
             }
             else if (mGameStage == GameStage.SENCOND_HALF &&
-                mGameTime >= mPackageSecondHalf.NextGenerationTime)
+                mGameTime >= mPackageSecondHalf.NextGenerationPackage().GenerationTime())
             {
                 mPackagesRemain.Add(mPackageSecondHalf.GeneratePackage());
                 return true;
@@ -548,23 +582,23 @@ namespace EDCHOST24
         ***********************************************/
         private bool _IsOnBlackLine(Dot _CarPos)
         {
-            return mBoundary.isCollided(_CarPos, COLLISION_RADIUS);
+            return Boundary.isCollided(_CarPos, COLLISION_RADIUS);
         }
 
         private bool _IsInObstacle (Dot _CarPos)
         {
-            return mObstacle.isCollided(_CarPos, COLLISION_RADIUS);
+            return Labyrinth.isCollided(_CarPos, COLLISION_RADIUS);
         }
 
         private bool _IsInOpponentStation (Dot _CarPos)
         {
             if (mCamp == Camp.A)
             {
-                return mChargeStation.isCollided(_CarPos, 2, COLLISION_RADIUS);
+                return Station.isCollided(_CarPos, 2, COLLISION_RADIUS);
             } 
             else if (mCamp == Camp.B)
             {
-                return mChargeStation.isCollided(_CarPos, 1, COLLISION_RADIUS);
+                return Station.isCollided(_CarPos, 1, COLLISION_RADIUS);
             }
             else
             {

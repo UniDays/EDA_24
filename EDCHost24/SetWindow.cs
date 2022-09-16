@@ -322,7 +322,7 @@ namespace EDCHOST24
             string FileName = cbLaby.Text;
 
             // 从已选文件中读取数据
-            _game.mLabyrinth.ReadFromFile(FileName);
+            _game.mObstacle.ReadFromFile(FileName);
         }
     }
 }

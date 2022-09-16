@@ -13,7 +13,7 @@ namespace EDCHOST24
     // STL : Storage the Package
     public class PackageList //存储预备要用的物资信息
     {
-        private static List<Package> mPackageList;
+        private static List<Package> mPackageList = null;
 
         private int X_MAX;
         private int X_MIN;
@@ -112,20 +112,6 @@ namespace EDCHOST24
             mPointer = 0;
         }
 
-        // 检查所有package，整个检测程序写在Dot里
-        public static bool IsPackageExisted(Dot adot)
-        {
-            //check mPackageList
-            foreach(Package element in mPackageList)
-            {
-                if(element.IsDotExisted(adot))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
         private static bool IsPosLegal(Dot _dot, int _Type = 0)
         {
             if (_Type == 0)
@@ -136,6 +122,8 @@ namespace EDCHOST24
             {
                 return !(Boundary.isCollided(_dot) || Labyrinth.isCollided(_dot) || Station.isCollided(_dot, 0));
             }
+
+            return false;
         }
     }
 }

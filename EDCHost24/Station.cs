@@ -33,9 +33,13 @@ namespace EDCHOST24
             {
                 return mStationList1;
             }
-            else
+            else if (_Type == 1)
             {
                 return mStationList2;
+            }
+            else
+            {
+                Debug.WriteLine("Failed to get station list! Expect type input to be 0 or 1.");
             }
         }
 

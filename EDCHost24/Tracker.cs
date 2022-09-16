@@ -53,14 +53,8 @@ namespace EDCHOST24
         private Point2i[] camPkgs;
 
         // 以下坐标均为逻辑坐标
-        private Point2i logicPsgStart;
-        private Point2i logicPsgEnd;
         private Point2i logicCarA;
         private Point2i logicCarB;
-        private Point2i[] logicPkgs;
-
-        //以下为物资的坐标显示
-        private int[] PkgsWhetherPicked;
 
         // 以下均为显示坐标
         private Point2i showCarA;
@@ -127,10 +121,6 @@ namespace EDCHOST24
             // 定位小车位置的类
             localiser = new Localiser();
 
-            // 记录时间
-            timeCamNow = DateTime.Now;
-            timeCamPrev = timeCamNow;
-
             // 相机坐标初始化
             camPsgStart = new Point2i();
             camPsgEnd = new Point2i();
@@ -139,13 +129,8 @@ namespace EDCHOST24
             camPkgs = new Point2i[0];
 
             // 逻辑坐标初始化
-            logicPsgStart = new Point2i();
-            logicPsgEnd = new Point2i();
             logicCarA = new Point2i();
             logicCarB = new Point2i();
-            logicPkgs = new Point2i[6];
-            //物资信息初始化
-            PkgsWhetherPicked = new int[6];
 
             // 显示坐标初始化
             showCarA = new Point2i();
@@ -306,11 +291,6 @@ namespace EDCHOST24
 
                         // 在显示的画面上绘制小车，乘客，物资等对应的图案
                         PaintPattern(videoFrame, localiser);
-
-                        // 处理时间参数
-                        timeCamNow = DateTime.Now;
-                        TimeSpan timeProcess = timeCamNow - timeCamPrev;
-                        timeCamPrev = timeCamNow;
 
                         // 将摄像头视频帧缩放成显示帧
                         // Resize函数的最后一个参数是缩放函数的插值算法
@@ -648,6 +628,11 @@ namespace EDCHOST24
         private void buttonEnd_Click(object sender, EventArgs e)
         {
             game.End();
+        }
+
+        private void buttonRestart_click(object sender, EventArgs e)
+        {
+            game = new Game();
         }
 
         // Get foul mark
